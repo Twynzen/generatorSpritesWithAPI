@@ -1,0 +1,74 @@
+.cost-display {
+  @apply bg-surface-light rounded-xl p-4 space-y-4;
+}
+
+.cost-header {
+  @apply flex items-center justify-between;
+
+  .cost-label {
+    @apply text-sm text-slate-400;
+  }
+
+  .cost-price {
+    @apply text-2xl font-bold text-success;
+  }
+}
+
+.resolution-selector {
+  @apply space-y-2;
+
+  .selector-label {
+    @apply text-xs text-slate-500;
+  }
+}
+
+.resolution-options {
+  @apply flex gap-2;
+}
+
+.resolution-btn {
+  @apply flex-1 flex flex-col items-center p-3 rounded-lg;
+  @apply bg-slate-700/50 border border-slate-600/50;
+  @apply hover:bg-slate-700 transition-all;
+
+  &.active {
+    @apply bg-primary/20 border-primary text-primary;
+  }
+
+  .res-value {
+    @apply text-sm font-medium;
+  }
+
+  .res-price {
+    @apply text-xs text-slate-400;
+  }
+
+  &.active .res-price {
+    @apply text-primary/80;
+  }
+}
+
+.cost-details {
+  @apply space-y-2 pt-2 border-t border-slate-700/50;
+}
+
+.detail-row {
+  @apply flex items-center justify-between text-sm;
+
+  .detail-label {
+    @apply text-slate-500;
+  }
+
+  .detail-value {
+    @apply text-slate-300;
+  }
+}
+
+.cost-notes {
+  @apply flex items-start gap-2 p-3 rounded-lg bg-slate-800/50;
+  @apply text-xs text-slate-400;
+
+  svg {
+    @apply flex-shrink-0 mt-0.5 text-slate-500;
+  }
+}

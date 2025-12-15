@@ -1,0 +1,165 @@
+<div class="generator-page">
+  <!-- Header -->
+  <header class="page-header">
+    <div class="header-content">
+      <h1 class="page-title">
+        Sprite Video Generator
+      </h1>
+      <p class="page-subtitle">
+        Generate perfect loop animations for your video game sprites
+      </p>
+    </div>
+    <a routerLink="/history" class="history-link">
+      History ({{ storageService.historyCount() }})
+    </a>
+  </header>
+
+  <!-- Error Message -->
+  @if (errorMessage || state.error()) {
+    <div class="error-banner">
+      <span>{{ errorMessage || state.error() }}</span>
+      <button (click)="clearError()">x</button>
+    </div>
+  }
+
+  <!-- Main Content -->
+  <main class="generator-content">
+    <!-- Left Column: Inputs -->
+    <section class="input-section">
+      <!-- First Frame -->
+      <div class="input-group">
+        <h2 class="section-title">1. Start Image</h2>
+
+        @if (state.firstFrame(); as firstFrame) {
+          <app-image-preview
+            [metadata]="firstFrame.metadata"
+            label="Initial Frame"
+            (remove)="removeFirstFrame()"
+          />
+        } @else {
+          <app-drop-zone
+            (fileSelected)="onFirstFrameSelected($event)"
+            (error)="onError($event)"
+          />
+        }
+      </div>
+
+      <!-- Use Same Frame Toggle -->
+      @if (state.firstFrame()) {
+        <div class="toggle-group">
+          <label class="toggle-label">
+            <input
+              type="checkbox"
+              [checked]="state.useSameFrame()"
+              (change)="onUseSameFrameChange($any($event.target).checked)"
+              class="toggle-input"
+            />
+            <span class="toggle-text">
+              Use same image as final frame (perfect loop)
+            </span>
+          </label>
+          <p class="toggle-hint">
+            Recommended for walk cycles, idle, and other cyclic animations
+          </p>
+        </div>
+      }
+
+      <!-- Last Frame (if not using same frame) -->
+      @if (state.firstFrame() && !state.useSameFrame()) {
+        <div class="input-group">
+          <h2 class="section-title">2. Final Image (optional)</h2>
+
+          @if (state.lastFrame(); as lastFrame) {
+            <app-image-preview
+              [metadata]="lastFrame.metadata"
+              label="Final Frame"
+              (remove)="removeLastFrame()"
+            />
+          } @else {
+            <app-drop-zone
+              (fileSelected)="onLastFrameSelected($event)"
+              (error)="onError($event)"
+            />
+          }
+        </div>
+      }
+
+      <!-- Prompt -->
+      @if (state.firstFrame()) {
+        <div class="input-group">
+          <h2 class="section-title">
+            {{ state.useSameFrame() ? '2' : '3' }}. Describe the Animation
+          </h2>
+          <app-prompt-editor
+            [prompt]="state.prompt()"
+            (promptChange)="onPromptChange($event)"
+          />
+        </div>
+      }
+    </section>
+
+    <!-- Right Column: Cost & Actions -->
+    <aside class="actions-section">
+      <!-- Cost Display -->
+      @if (state.firstFrame()) {
+        <app-cost-display
+          [costEstimate]="costEstimate"
+          [resolution]="state.resolution()"
+          (resolutionChange)="onResolutionChange($event)"
+        />
+      }
+
+      <!-- Progress -->
+      <app-progress-indicator
+        [status]="state.status()"
+        [progress]="state.progress()"
+        [logs]="state.logs()"
+      />
+
+      <!-- Generate Button -->
+      @if (state.status() === 'idle') {
+        <button
+          type="button"
+          class="generate-btn"
+          [disabled]="!state.canGenerate()"
+          (click)="generateVideo()"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+          Generate Video
+        </button>
+      }
+
+      <!-- Result -->
+      @if (state.result(); as result) {
+        <app-video-result
+          [video]="result"
+          [cost]="costEstimate.pricePerVideo"
+          (newGeneration)="startNewGeneration()"
+        />
+      }
+
+      <!-- Reset Button -->
+      @if (state.firstFrame() && state.status() === 'idle') {
+        <button
+          type="button"
+          class="reset-btn"
+          (click)="resetAll()"
+        >
+          Start Over
+        </button>
+      }
+    </aside>
+  </main>
+
+  <!-- Footer -->
+  <footer class="page-footer">
+    <p>
+      Powered by <a href="https://fal.ai" target="_blank">FAL.ai</a> -
+      Model: Wan 2.1 FLF2V -
+      <a href="https://fal.ai/models/fal-ai/wan-flf2v" target="_blank">Documentation</a>
+    </p>
+  </footer>
+</div>

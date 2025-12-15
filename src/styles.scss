@@ -1,0 +1,57 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+// Variables globales
+:root {
+  --color-primary: #6366f1;
+  --color-surface: #1e1e2e;
+  --color-text: #e2e8f0;
+  --border-radius: 12px;
+}
+
+// Reset básico
+* {
+  box-sizing: border-box;
+}
+
+body {
+  @apply bg-surface text-slate-200 font-sans;
+  margin: 0;
+  min-height: 100vh;
+}
+
+// Utilidades para drag & drop
+.drag-over {
+  @apply border-primary bg-primary/10;
+}
+
+// Scrollbar personalizado
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  @apply bg-surface-light rounded-full;
+}
+
+::-webkit-scrollbar-thumb {
+  @apply bg-slate-600 rounded-full hover:bg-slate-500;
+}
+
+// Animaciones globales
+@keyframes fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in {
+  animation: fade-in 0.3s ease-out;
+}

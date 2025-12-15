@@ -1,0 +1,69 @@
+.progress-indicator {
+  @apply bg-surface-light rounded-xl p-4 space-y-3;
+
+  &.in_progress,
+  &.uploading,
+  &.in_queue {
+    @apply border border-primary/30 bg-primary/5;
+  }
+
+  &.completed {
+    @apply border border-success/30 bg-success/5;
+  }
+
+  &.failed {
+    @apply border border-error/30 bg-error/5;
+  }
+}
+
+.progress-header {
+  @apply flex items-center gap-3;
+}
+
+.status-icon {
+  .in_progress &,
+  .uploading &,
+  .in_queue & {
+    @apply text-primary;
+  }
+
+  .completed & {
+    @apply text-success;
+  }
+
+  .failed & {
+    @apply text-error;
+  }
+}
+
+.status-text {
+  @apply text-sm font-medium text-slate-200;
+}
+
+.progress-bar-container {
+  @apply h-2 bg-slate-700 rounded-full overflow-hidden;
+}
+
+.progress-bar {
+  @apply h-full bg-primary rounded-full transition-all duration-300;
+}
+
+.progress-percent {
+  @apply text-xs text-slate-400 text-right block;
+}
+
+.logs-container {
+  @apply pt-2 border-t border-slate-700/50;
+}
+
+.logs-summary {
+  @apply text-xs text-slate-500 cursor-pointer hover:text-slate-400;
+}
+
+.logs-list {
+  @apply mt-2 max-h-32 overflow-y-auto space-y-1;
+}
+
+.log-item {
+  @apply text-xs text-slate-400 font-mono bg-slate-800/50 px-2 py-1 rounded;
+}

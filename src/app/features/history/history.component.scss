@@ -1,0 +1,107 @@
+.history-page {
+  @apply min-h-screen bg-surface;
+}
+
+.page-header {
+  @apply flex items-center justify-between px-6 py-4 bg-surface-light border-b border-slate-700/50;
+}
+
+.header-content {
+  @apply flex items-center gap-4;
+}
+
+.back-link {
+  @apply flex items-center gap-2 text-slate-400 hover:text-slate-200 transition-colors;
+}
+
+.page-title {
+  @apply text-xl font-bold text-slate-100;
+}
+
+.clear-btn {
+  @apply px-4 py-2 rounded-lg text-sm;
+  @apply text-error hover:bg-error/10 transition-colors;
+}
+
+.history-content {
+  @apply p-6;
+}
+
+.empty-state {
+  @apply flex flex-col items-center justify-center py-16 text-center;
+
+  .empty-title {
+    @apply text-xl font-semibold text-slate-300 mt-4;
+  }
+
+  .empty-text {
+    @apply text-sm text-slate-500 mt-2;
+  }
+
+  .empty-action {
+    @apply mt-6 px-6 py-3 rounded-xl bg-primary text-white font-medium;
+    @apply hover:bg-primary-dark transition-colors;
+  }
+}
+
+.history-grid {
+  @apply grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4;
+}
+
+.history-card {
+  @apply bg-surface-light rounded-xl overflow-hidden;
+  @apply border border-slate-700/50 hover:border-slate-600 transition-colors;
+}
+
+.card-header {
+  @apply flex items-center justify-between px-4 py-2 bg-slate-700/50;
+
+  .card-date {
+    @apply text-xs text-slate-400;
+  }
+
+  .card-cost {
+    @apply text-xs font-medium text-success;
+  }
+}
+
+.card-video {
+  @apply bg-black aspect-video;
+}
+
+.video-preview {
+  @apply w-full h-full object-contain;
+}
+
+.card-info {
+  @apply p-4;
+
+  .card-prompt {
+    @apply text-sm text-slate-300 line-clamp-2;
+  }
+
+  .card-meta {
+    @apply flex items-center gap-2 mt-2;
+  }
+
+  .meta-item {
+    @apply text-xs px-2 py-0.5 rounded bg-slate-700/50 text-slate-400;
+  }
+}
+
+.card-actions {
+  @apply flex items-center gap-2 px-4 py-3 border-t border-slate-700/50;
+}
+
+.action-btn {
+  @apply p-2 rounded-lg text-slate-400 hover:text-slate-200;
+  @apply hover:bg-slate-700/50 transition-colors;
+
+  &.primary {
+    @apply text-primary hover:text-primary hover:bg-primary/10;
+  }
+
+  &.danger {
+    @apply hover:text-error hover:bg-error/10;
+  }
+}

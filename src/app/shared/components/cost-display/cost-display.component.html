@@ -1,0 +1,49 @@
+<div class="cost-display">
+  <div class="cost-header">
+    <span class="cost-label">Estimated Cost</span>
+    <span class="cost-price">{{ costEstimate().priceFormatted }}</span>
+  </div>
+
+  <div class="resolution-selector">
+    <span class="selector-label">Resolution:</span>
+    <div class="resolution-options">
+      @for (res of resolutions; track res.value) {
+        <button
+          type="button"
+          class="resolution-btn"
+          [class.active]="resolution() === res.value"
+          (click)="onResolutionChange(res.value)"
+        >
+          <span class="res-value">{{ res.label }}</span>
+          <span class="res-price">
+            {{ res.value === '480p' ? '$0.20' : '$0.40' }}
+          </span>
+        </button>
+      }
+    </div>
+  </div>
+
+  <div class="cost-details">
+    <div class="detail-row">
+      <span class="detail-label">Model:</span>
+      <span class="detail-value">{{ costEstimate().model }}</span>
+    </div>
+    <div class="detail-row">
+      <span class="detail-label">Provider:</span>
+      <span class="detail-value">{{ costEstimate().provider }}</span>
+    </div>
+    <div class="detail-row">
+      <span class="detail-label">Estimated duration:</span>
+      <span class="detail-value">~5 seconds &#64; 24fps</span>
+    </div>
+  </div>
+
+  @if (costEstimate().notes) {
+    <div class="cost-notes">
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+        <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd" />
+      </svg>
+      <span>{{ costEstimate().notes }}</span>
+    </div>
+  }
+</div>

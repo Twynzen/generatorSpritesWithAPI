@@ -1,0 +1,42 @@
+.image-preview {
+  @apply bg-surface-light rounded-xl overflow-hidden;
+}
+
+.preview-header {
+  @apply flex items-center justify-between px-4 py-3 bg-slate-700/50;
+
+  .label {
+    @apply text-sm font-medium text-slate-300;
+  }
+
+  .remove-btn {
+    @apply p-1 rounded-lg text-slate-400 hover:text-error hover:bg-error/10 transition-colors;
+  }
+}
+
+.preview-image-container {
+  @apply p-4 flex justify-center items-center bg-[#0a0a0f];
+  min-height: 150px;
+  max-height: 250px;
+}
+
+.preview-image {
+  @apply max-w-full max-h-[200px] object-contain rounded;
+  image-rendering: pixelated; // For pixel art sprites
+}
+
+.metadata-grid {
+  @apply grid grid-cols-2 gap-3 p-4 border-t border-slate-700/50;
+}
+
+.metadata-item {
+  @apply flex flex-col;
+
+  .metadata-label {
+    @apply text-xs text-slate-500 uppercase tracking-wider;
+  }
+
+  .metadata-value {
+    @apply text-sm text-slate-200 font-medium mt-0.5;
+  }
+}
