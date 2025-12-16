@@ -48,108 +48,143 @@ export class FalApiService {
 
   /**
    * Builds the request body based on the model type
+   * Uses correct parameter names based on FAL.ai documentation
    */
   private buildRequestBody(request: FalSubmitRequest): Record<string, unknown> {
     const model = request.model;
     const modelId = model.id;
 
-    // Base payload with image
-    const payload: Record<string, unknown> = {
-      image_url: request.imageUrl
-    };
-
     // Models that DON'T require prompt (Stable Video Diffusion variants)
     if (!model.promptRequired) {
       return {
-        ...payload,
+        image_url: request.imageUrl,
         motion_bucket_id: request.motionBucketId ?? 127,
-        fps: request.fps ?? 25
+        fps: request.fps ?? (modelId === 'fast-svd-lcm' ? 10 : 25),
+        ...(modelId === 'fast-svd-lcm' && { steps: 4 })
       };
     }
 
-    // All other models require prompt
-    payload['prompt'] = request.prompt;
-
-    // Build model-specific parameters
+    // Build model-specific request bodies
     switch (modelId) {
-      // Kling models
-      case 'kling-v2.1-master':
-      case 'kling-v2.1-pro':
-      case 'kling-v2.1-standard':
-        return {
-          ...payload,
-          duration: request.duration ?? '5',
-          aspect_ratio: request.aspectRatio ?? '16:9',
-          negative_prompt: request.negativePrompt ?? 'blur, distort, low quality',
-          cfg_scale: request.cfgScale ?? 0.5
-        };
-
-      // Luma Dream Machine v1.5
+      // ═══════════════════════════════════════════════════════════════
+      // LUMA MODELS - use end_image_url
+      // ═══════════════════════════════════════════════════════════════
       case 'luma-dream-machine':
         return {
-          ...payload,
+          prompt: request.prompt,
+          image_url: request.imageUrl,
+          ...(request.endImageUrl && { end_image_url: request.endImageUrl }),
           aspect_ratio: request.aspectRatio ?? '16:9',
           loop: request.loop ?? false
         };
 
-      // Luma Ray 2 variants
       case 'luma-ray-2':
       case 'luma-ray-2-flash':
         return {
-          ...payload,
+          prompt: request.prompt,
+          image_url: request.imageUrl,
+          ...(request.endImageUrl && { end_image_url: request.endImageUrl }),
           aspect_ratio: request.aspectRatio ?? '16:9',
           resolution: request.resolution ?? '540p',
           duration: request.duration ?? '5s',
           loop: request.loop ?? false
         };
 
-      // MiniMax Video-01
-      case 'minimax-video-01':
+      // ═══════════════════════════════════════════════════════════════
+      // KLING MODELS - Pro uses tail_image_url, others don't support end frame
+      // ═══════════════════════════════════════════════════════════════
+      case 'kling-v2.1-pro':
         return {
-          ...payload,
-          prompt_optimizer: request.promptOptimizer ?? true
+          prompt: request.prompt,
+          image_url: request.imageUrl,
+          ...(request.endImageUrl && { tail_image_url: request.endImageUrl }), // Pro ONLY!
+          duration: request.duration ?? '5',
+          aspect_ratio: request.aspectRatio ?? '16:9',
+          negative_prompt: request.negativePrompt ?? 'blur, distort, low quality',
+          cfg_scale: request.cfgScale ?? 0.5
         };
 
-      // Wan 2.1 First-Last Frame (requires TWO images)
-      case 'wan-flf2v':
+      case 'kling-v2.1-master':
+      case 'kling-v2.1-standard':
+        // Master and Standard do NOT support tail_image_url
         return {
-          start_image_url: request.imageUrl,
-          end_image_url: request.endImageUrl,
           prompt: request.prompt,
+          image_url: request.imageUrl,
+          duration: request.duration ?? '5',
+          aspect_ratio: request.aspectRatio ?? '16:9',
+          negative_prompt: request.negativePrompt ?? 'blur, distort, low quality',
+          cfg_scale: request.cfgScale ?? 0.5
+        };
+
+      // ═══════════════════════════════════════════════════════════════
+      // WAN MODELS
+      // ═══════════════════════════════════════════════════════════════
+      case 'wan-flf2v':
+        // First-Last Frame model - requires BOTH images
+        return {
+          prompt: request.prompt,
+          start_image_url: request.imageUrl,
+          end_image_url: request.endImageUrl, // REQUIRED for this model
           negative_prompt: request.negativePrompt ?? 'blur, distort, low quality, static',
           resolution: request.resolution ?? '720p',
           aspect_ratio: request.aspectRatio ?? 'auto',
           num_frames: 81,
-          frames_per_second: request.fps ?? 16
+          frames_per_second: request.fps ?? 16,
+          num_inference_steps: 30,
+          guide_scale: 5
         };
 
-      // Wan 2.1 Image-to-Video (single image)
       case 'wan-i2v':
+        // Single image model
         return {
-          ...payload,
+          prompt: request.prompt,
+          image_url: request.imageUrl,
+          negative_prompt: request.negativePrompt ?? 'blur, distort, low quality',
           resolution: request.resolution ?? '480p',
           aspect_ratio: request.aspectRatio ?? 'auto',
           num_frames: 81,
           frames_per_second: request.fps ?? 16
         };
 
-      // Pika v2.2
+      // ═══════════════════════════════════════════════════════════════
+      // MINIMAX - Camera control via prompt brackets
+      // ═══════════════════════════════════════════════════════════════
+      case 'minimax-video-01':
+        return {
+          prompt: request.prompt, // Include [Camera movement] in prompt
+          image_url: request.imageUrl,
+          prompt_optimizer: request.promptOptimizer ?? true
+        };
+
+      // ═══════════════════════════════════════════════════════════════
+      // PIKA
+      // ═══════════════════════════════════════════════════════════════
       case 'pika-v2.2':
         return {
-          ...payload,
-          resolution: request.resolution ?? '720p'
+          prompt: request.prompt,
+          image_url: request.imageUrl,
+          resolution: request.resolution ?? '720p',
+          duration: 5
         };
 
-      // LTX Video
+      // ═══════════════════════════════════════════════════════════════
+      // LTX VIDEO (Research license only)
+      // ═══════════════════════════════════════════════════════════════
       case 'ltx-video':
         return {
-          ...payload,
-          negative_prompt: request.negativePrompt
+          prompt: request.prompt,
+          image_url: request.imageUrl,
+          ...(request.negativePrompt && { negative_prompt: request.negativePrompt }),
+          num_inference_steps: 30,
+          guidance_scale: 3
         };
 
-      // Default fallback (generic model)
+      // Default fallback
       default:
-        return payload;
+        return {
+          prompt: request.prompt,
+          image_url: request.imageUrl
+        };
     }
   }
 

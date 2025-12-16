@@ -29,16 +29,19 @@ export const RESOLUTIONS = {
 } as const;
 
 // ═══════════════════════════════════════════════════════════════
-// VIDEO MODELS CONFIGURATION
+// VIDEO MODELS CONFIGURATION - Updated based on FAL.ai research
 // ═══════════════════════════════════════════════════════════════
 
 export type ModelTier = 'premium' | 'balanced' | 'economy';
 export type ModelQuality = 1 | 2 | 3 | 4 | 5;
 
+// Parameter name for end image varies by model
+export type EndImageParamType = 'end_image_url' | 'tail_image_url' | 'images_array' | 'none';
+
 export interface VideoModelConfig {
   id: string;
   endpoint: string;
-  pollingEndpoint: string; // Base endpoint for polling (without /image-to-video)
+  pollingEndpoint: string;
   name: string;
   provider: string;
   tier: ModelTier;
@@ -51,7 +54,8 @@ export interface VideoModelConfig {
   promptRequired: boolean;
   supportsLoop: boolean;
   supportsNegativePrompt: boolean;
-  supportsEndImage: boolean; // true = requires start + end image (first/last frame)
+  supportsEndImage: boolean;
+  endImageParamName: EndImageParamType; // Which param name to use for end frame
   description: string;
   icon: string;
 }
@@ -76,8 +80,9 @@ export const VIDEO_MODELS: VideoModelConfig[] = [
     promptRequired: true,
     supportsLoop: false,
     supportsNegativePrompt: true,
-    supportsEndImage: false,
-    description: 'Cinematic quality, best motion fluidity',
+    supportsEndImage: false, // Master does NOT support tail_image
+    endImageParamName: 'none',
+    description: 'Highest quality, NO end frame support',
     icon: '👑'
   },
   {
@@ -90,14 +95,15 @@ export const VIDEO_MODELS: VideoModelConfig[] = [
     quality: 4,
     estimatedTime: '2-3 min',
     costPerVideo: 0.50,
-    costDisplay: '$0.50 (5s)',
+    costDisplay: '$0.50 (540p 5s)',
     maxDuration: 9,
     aspectRatios: ['16:9', '9:16', '4:3', '3:4', '21:9', '9:21'],
     promptRequired: true,
     supportsLoop: true,
     supportsNegativePrompt: false,
-    supportsEndImage: false,
-    description: 'Seamless loops, variable duration',
+    supportsEndImage: true, // SUPPORTS end_image_url
+    endImageParamName: 'end_image_url',
+    description: 'High quality with end frame interpolation',
     icon: '⭐'
   },
   {
@@ -116,8 +122,9 @@ export const VIDEO_MODELS: VideoModelConfig[] = [
     promptRequired: true,
     supportsLoop: false,
     supportsNegativePrompt: true,
-    supportsEndImage: false,
-    description: 'Enhanced visual fidelity',
+    supportsEndImage: true, // ONLY Pro supports tail_image_url!
+    endImageParamName: 'tail_image_url',
+    description: 'Pro quality WITH end frame support (tail_image)',
     icon: '🎬'
   },
 
@@ -140,8 +147,9 @@ export const VIDEO_MODELS: VideoModelConfig[] = [
     promptRequired: true,
     supportsLoop: true,
     supportsNegativePrompt: false,
-    supportsEndImage: false,
-    description: 'Proven model, great for sprites',
+    supportsEndImage: true, // SUPPORTS end_image_url
+    endImageParamName: 'end_image_url',
+    description: 'Proven model with end frame support',
     icon: '✨'
   },
   {
@@ -160,8 +168,9 @@ export const VIDEO_MODELS: VideoModelConfig[] = [
     promptRequired: true,
     supportsLoop: false,
     supportsNegativePrompt: false,
-    supportsEndImage: false,
-    description: 'Camera movement control',
+    supportsEndImage: false, // NO end frame support
+    endImageParamName: 'none',
+    description: 'Camera control via [brackets] in prompt',
     icon: '🎥'
   },
   {
@@ -180,11 +189,12 @@ export const VIDEO_MODELS: VideoModelConfig[] = [
     promptRequired: true,
     supportsLoop: false,
     supportsNegativePrompt: true,
-    supportsEndImage: false,
-    description: 'Cost-efficient Kling option',
+    supportsEndImage: false, // Standard does NOT support tail_image
+    endImageParamName: 'none',
+    description: 'Budget Kling, NO end frame support',
     icon: '⚡'
   },
-  // ── Wan Models (First/Last Frame support) ──
+  // ── Wan Models (First/Last Frame specialists) ──
   {
     id: 'wan-flf2v',
     endpoint: 'fal-ai/wan-flf2v',
@@ -201,8 +211,9 @@ export const VIDEO_MODELS: VideoModelConfig[] = [
     promptRequired: true,
     supportsLoop: false,
     supportsNegativePrompt: true,
-    supportsEndImage: true, // Requires start + end image!
-    description: 'Perfect for walk cycles - interpolates between frames',
+    supportsEndImage: true, // DESIGNED for first/last frame!
+    endImageParamName: 'end_image_url',
+    description: 'BEST for walk cycles - start_image + end_image',
     icon: '🎯'
   },
   {
@@ -221,8 +232,9 @@ export const VIDEO_MODELS: VideoModelConfig[] = [
     promptRequired: true,
     supportsLoop: false,
     supportsNegativePrompt: true,
-    supportsEndImage: false,
-    description: 'Single image animation',
+    supportsEndImage: false, // Single image only
+    endImageParamName: 'none',
+    description: 'Single image animation, no end frame',
     icon: '💎'
   },
   {
@@ -235,14 +247,15 @@ export const VIDEO_MODELS: VideoModelConfig[] = [
     quality: 3,
     estimatedTime: '~1 min',
     costPerVideo: 0.20,
-    costDisplay: '$0.20 (5s)',
+    costDisplay: '$0.20 (540p 5s)',
     maxDuration: 9,
     aspectRatios: ['16:9', '9:16', '4:3', '3:4', '21:9', '9:21'],
     promptRequired: true,
     supportsLoop: true,
     supportsNegativePrompt: false,
-    supportsEndImage: false,
-    description: 'Fast Ray 2 variant, 60% cheaper',
+    supportsEndImage: true, // SUPPORTS end_image_url like Ray 2
+    endImageParamName: 'end_image_url',
+    description: '3x faster, 3x cheaper than Ray 2, with end frame',
     icon: '⚡'
   },
   {
@@ -261,8 +274,9 @@ export const VIDEO_MODELS: VideoModelConfig[] = [
     promptRequired: true,
     supportsLoop: false,
     supportsNegativePrompt: false,
-    supportsEndImage: false,
-    description: 'Dynamic video generation',
+    supportsEndImage: false, // Use Pikaframes for end frame
+    endImageParamName: 'none',
+    description: 'Basic I2V, use Pikaframes for keyframes',
     icon: '🎨'
   },
 
@@ -282,11 +296,12 @@ export const VIDEO_MODELS: VideoModelConfig[] = [
     costDisplay: '$0.075',
     maxDuration: 4,
     aspectRatios: ['input-based'],
-    promptRequired: false,
+    promptRequired: false, // NO PROMPT - image only
     supportsLoop: false,
     supportsNegativePrompt: false,
     supportsEndImage: false,
-    description: 'No prompt needed, motion control',
+    endImageParamName: 'none',
+    description: 'No prompt needed, motion_bucket_id controls motion',
     icon: '🚀'
   },
   {
@@ -298,15 +313,16 @@ export const VIDEO_MODELS: VideoModelConfig[] = [
     tier: 'economy',
     quality: 2,
     estimatedTime: '~10s',
-    costPerVideo: 0.03,
-    costDisplay: '~$0.03',
+    costPerVideo: 0.01,
+    costDisplay: '~$0.01',
     maxDuration: 4,
     aspectRatios: ['input-based'],
     promptRequired: false,
     supportsLoop: false,
     supportsNegativePrompt: false,
     supportsEndImage: false,
-    description: 'Lightning fast, best for prototyping',
+    endImageParamName: 'none',
+    description: '5x faster than SVD, best for prototyping',
     icon: '💨'
   },
   {
@@ -318,15 +334,16 @@ export const VIDEO_MODELS: VideoModelConfig[] = [
     tier: 'economy',
     quality: 2,
     estimatedTime: '~20s',
-    costPerVideo: 0.04,
-    costDisplay: '$0.04',
+    costPerVideo: 0.02,
+    costDisplay: '$0.02',
     maxDuration: 5,
     aspectRatios: ['input-based'],
     promptRequired: true,
     supportsLoop: false,
-    supportsNegativePrompt: false,
+    supportsNegativePrompt: true,
     supportsEndImage: false,
-    description: 'Cheapest with prompts',
+    endImageParamName: 'none',
+    description: 'Research license only - NOT commercial',
     icon: '💰'
   }
 ];
@@ -346,3 +363,7 @@ export const getModelsSortedByQuality = (): VideoModelConfig[] =>
 
 export const getModelsSortedByCost = (): VideoModelConfig[] =>
   [...VIDEO_MODELS].sort((a, b) => a.costPerVideo - b.costPerVideo);
+
+// Get models that support first/last frame interpolation
+export const getModelsWithEndFrameSupport = (): VideoModelConfig[] =>
+  VIDEO_MODELS.filter(m => m.supportsEndImage);
