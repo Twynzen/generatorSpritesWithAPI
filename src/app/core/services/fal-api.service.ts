@@ -70,16 +70,18 @@ export class FalApiService {
       // LUMA MODELS - use end_image_url
       // ═══════════════════════════════════════════════════════════════
       case 'luma-dream-machine':
+        // IMPORTANT: loop is NOT supported when using end_image_url
         return {
           prompt: request.prompt,
           image_url: request.imageUrl,
           ...(request.endImageUrl && { end_image_url: request.endImageUrl }),
           aspect_ratio: request.aspectRatio ?? '16:9',
-          loop: request.loop ?? false
+          ...(!request.endImageUrl && { loop: request.loop ?? false }) // Only include loop if NO end image
         };
 
       case 'luma-ray-2':
       case 'luma-ray-2-flash':
+        // IMPORTANT: loop is NOT supported when using end_image_url
         return {
           prompt: request.prompt,
           image_url: request.imageUrl,
@@ -87,29 +89,34 @@ export class FalApiService {
           aspect_ratio: request.aspectRatio ?? '16:9',
           resolution: request.resolution ?? '540p',
           duration: request.duration ?? '5s',
-          loop: request.loop ?? false
+          ...(!request.endImageUrl && { loop: request.loop ?? false }) // Only include loop if NO end image
         };
 
       // ═══════════════════════════════════════════════════════════════
-      // KLING MODELS - Pro uses tail_image_url, others don't support end frame
+      // KLING v2.1 MODELS - None support end frame (use Kling O1 for that)
       // ═══════════════════════════════════════════════════════════════
       case 'kling-v2.1-pro':
+      case 'kling-v2.1-master':
+      case 'kling-v2.1-standard':
+        // v2.1 models do NOT support tail_image_url - use Kling O1 for first/last frame
         return {
           prompt: request.prompt,
           image_url: request.imageUrl,
-          ...(request.endImageUrl && { tail_image_url: request.endImageUrl }), // Pro ONLY!
           duration: request.duration ?? '5',
           aspect_ratio: request.aspectRatio ?? '16:9',
           negative_prompt: request.negativePrompt ?? 'blur, distort, low quality',
           cfg_scale: request.cfgScale ?? 0.5
         };
 
-      case 'kling-v2.1-master':
-      case 'kling-v2.1-standard':
-        // Master and Standard do NOT support tail_image_url
+      // ═══════════════════════════════════════════════════════════════
+      // KLING O1 - First-to-Last Frame video generation
+      // ═══════════════════════════════════════════════════════════════
+      case 'kling-o1':
+        // Uses @Image1 and @Image2 references in prompt for start/end frames
         return {
           prompt: request.prompt,
           image_url: request.imageUrl,
+          ...(request.endImageUrl && { tail_image_url: request.endImageUrl }),
           duration: request.duration ?? '5',
           aspect_ratio: request.aspectRatio ?? '16:9',
           negative_prompt: request.negativePrompt ?? 'blur, distort, low quality',
@@ -121,10 +128,11 @@ export class FalApiService {
       // ═══════════════════════════════════════════════════════════════
       case 'wan-flf2v':
         // First-Last Frame model - requires BOTH images
+        // Uses first_frame_url and last_frame_url (NOT start_image_url/end_image_url)
         return {
           prompt: request.prompt,
-          start_image_url: request.imageUrl,
-          end_image_url: request.endImageUrl, // REQUIRED for this model
+          first_frame_url: request.imageUrl,      // First frame
+          last_frame_url: request.endImageUrl,    // Last frame (REQUIRED)
           negative_prompt: request.negativePrompt ?? 'blur, distort, low quality, static',
           resolution: request.resolution ?? '720p',
           aspect_ratio: request.aspectRatio ?? 'auto',
@@ -157,14 +165,15 @@ export class FalApiService {
         };
 
       // ═══════════════════════════════════════════════════════════════
-      // PIKA
+      // PIKA - duration is integer (not string!)
       // ═══════════════════════════════════════════════════════════════
       case 'pika-v2.2':
         return {
           prompt: request.prompt,
           image_url: request.imageUrl,
           resolution: request.resolution ?? '720p',
-          duration: 5
+          duration: 5, // Integer, not string
+          ...(request.negativePrompt && { negative_prompt: request.negativePrompt })
         };
 
       // ═══════════════════════════════════════════════════════════════

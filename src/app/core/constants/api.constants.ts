@@ -122,10 +122,31 @@ export const VIDEO_MODELS: VideoModelConfig[] = [
     promptRequired: true,
     supportsLoop: false,
     supportsNegativePrompt: true,
-    supportsEndImage: true, // ONLY Pro supports tail_image_url!
-    endImageParamName: 'tail_image_url',
-    description: 'Pro quality WITH end frame support (tail_image)',
+    supportsEndImage: false, // v2.1 does NOT support end frame - use Kling O1
+    endImageParamName: 'none',
+    description: 'Pro quality, single image animation',
     icon: '🎬'
+  },
+  {
+    id: 'kling-o1',
+    endpoint: 'fal-ai/kling-video/o1/image-to-video',
+    pollingEndpoint: 'fal-ai/kling-video/o1',
+    name: 'Kling O1 First-Last',
+    provider: 'Kuaishou',
+    tier: 'premium',
+    quality: 4,
+    estimatedTime: '2-4 min',
+    costPerVideo: 0.56,
+    costDisplay: '$0.56 (5s)',
+    maxDuration: 10,
+    aspectRatios: ['16:9', '9:16', '1:1'],
+    promptRequired: true,
+    supportsLoop: false,
+    supportsNegativePrompt: true,
+    supportsEndImage: true, // O1 is designed for first/last frame!
+    endImageParamName: 'tail_image_url',
+    description: 'First-to-Last frame interpolation',
+    icon: '🔄'
   },
 
   // ═══════════════════════════════════════════════════════════════
