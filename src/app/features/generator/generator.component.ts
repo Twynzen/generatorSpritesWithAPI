@@ -256,6 +256,27 @@ export class GeneratorComponent {
   }
 
   /**
+   * Retry the same generation after an error
+   */
+  retryGeneration(): void {
+    this.clearError();
+    this.state.resetGeneration();
+    // Small delay to let state update, then retry
+    setTimeout(() => this.generateVideo(), 100);
+  }
+
+  /**
+   * Reset to try a different model (keeps images, clears error)
+   */
+  resetForNewModel(): void {
+    this.clearError();
+    this.state.resetGeneration();
+    // Scroll to model selector
+    const modelSection = document.querySelector('.input-group:nth-of-type(2)');
+    modelSection?.scrollIntoView({ behavior: 'smooth' });
+  }
+
+  /**
    * Full reset
    */
   resetAll(): void {

@@ -95,7 +95,18 @@ export class VideoGeneratorState {
       // If not supported, use the first available aspect ratio for this model
       const newAspectRatio = isSupported ? currentAspectRatio : model.aspectRatios[0];
 
-      return { ...s, selectedModel: model, aspectRatio: newAspectRatio };
+      // Clear endImage if switching to a model that doesn't support it
+      const newEndImage = model.supportsEndImage ? s.endImage : null;
+
+      // Clear error and reset status when switching models
+      return {
+        ...s,
+        selectedModel: model,
+        aspectRatio: newAspectRatio,
+        endImage: newEndImage,
+        error: null,
+        status: 'idle'
+      };
     });
   }
 

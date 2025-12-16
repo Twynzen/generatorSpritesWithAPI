@@ -110,13 +110,13 @@ export class FalApiService {
 
       // ═══════════════════════════════════════════════════════════════
       // KLING O1 - First-to-Last Frame video generation
+      // Uses start_image_url (NOT image_url!) and end_image_url
       // ═══════════════════════════════════════════════════════════════
       case 'kling-o1':
-        // Uses @Image1 and @Image2 references in prompt for start/end frames
         return {
           prompt: request.prompt,
-          image_url: request.imageUrl,
-          ...(request.endImageUrl && { tail_image_url: request.endImageUrl }),
+          start_image_url: request.imageUrl,  // REQUIRED: First frame
+          ...(request.endImageUrl && { end_image_url: request.endImageUrl }), // Last frame
           duration: request.duration ?? '5',
           aspect_ratio: request.aspectRatio ?? '16:9',
           negative_prompt: request.negativePrompt ?? 'blur, distort, low quality',

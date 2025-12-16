@@ -83,6 +83,22 @@
   @apply transition-colors;
 }
 
+.error-actions {
+  @apply flex flex-col gap-3;
+}
+
+.retry-btn {
+  @apply w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl;
+  @apply bg-amber-600 text-white font-medium;
+  @apply hover:bg-amber-500 transition-all;
+}
+
+.change-model-btn {
+  @apply w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl;
+  @apply bg-slate-700 text-slate-200 font-medium;
+  @apply hover:bg-slate-600 transition-all;
+}
+
 .page-footer {
   @apply px-6 py-4 border-t border-slate-700/50 text-center;
   @apply text-xs text-slate-500;

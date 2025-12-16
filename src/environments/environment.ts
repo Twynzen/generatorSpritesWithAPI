@@ -5,7 +5,7 @@ export const environment = {
     baseUrl: '/api/fal',
     // IMPORTANT: In production, use backend proxy
     // NEVER expose API key in production frontend
-    apiKey: 'YOUR_FAL_API_KEY' // Get your key from https://fal.ai
+    apiKey: 'YOUR_FAL_API_KEY_HERE'
   },
   pricing: {
     // Luma Dream Machine has fixed price per video

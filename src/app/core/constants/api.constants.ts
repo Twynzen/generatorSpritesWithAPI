@@ -144,7 +144,7 @@ export const VIDEO_MODELS: VideoModelConfig[] = [
     supportsLoop: false,
     supportsNegativePrompt: true,
     supportsEndImage: true, // O1 is designed for first/last frame!
-    endImageParamName: 'tail_image_url',
+    endImageParamName: 'end_image_url', // Uses start_image_url + end_image_url
     description: 'First-to-Last frame interpolation',
     icon: '🔄'
   },
