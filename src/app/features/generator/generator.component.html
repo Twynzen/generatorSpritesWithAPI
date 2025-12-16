@@ -44,17 +44,37 @@
         }
       </div>
 
+      <!-- Model Selection -->
+      @if (state.spriteImage()) {
+        <div class="input-group">
+          <h2 class="section-title">2. Select AI Model</h2>
+          <app-model-selector
+            [selectedModelId]="state.selectedModel().id"
+            (modelChange)="onModelChange($event)"
+          />
+        </div>
+      }
+
       <!-- Prompt -->
       @if (state.spriteImage()) {
         <div class="input-group">
-          <h2 class="section-title">2. Describe the Animation</h2>
-          <app-prompt-editor
-            [prompt]="state.prompt()"
-            (promptChange)="onPromptChange($event)"
-          />
-          <p class="input-hint">
-            Tip: Describe the movement you want, e.g., "Character walking cycle, smooth loop animation, side view"
-          </p>
+          <h2 class="section-title">3. Describe the Animation</h2>
+          @if (state.selectedModel().promptRequired) {
+            <app-prompt-editor
+              [prompt]="state.prompt()"
+              (promptChange)="onPromptChange($event)"
+            />
+            <p class="input-hint">
+              Tip: Describe the movement you want, e.g., "Character walking cycle, smooth loop animation, side view"
+            </p>
+          } @else {
+            <div class="bg-slate-800 rounded-lg p-4 border border-slate-700">
+              <p class="text-slate-400 text-sm">
+                <span class="text-green-400 font-medium">{{ state.selectedModel().icon }} {{ state.selectedModel().name }}</span>
+                doesn't require a text prompt. The AI will animate your sprite based on the image alone.
+              </p>
+            </div>
+          }
         </div>
       }
     </section>
@@ -119,8 +139,8 @@
   <footer class="page-footer">
     <p>
       Powered by <a href="https://fal.ai" target="_blank">FAL.ai</a> -
-      Model: Luma Dream Machine -
-      <a href="https://fal.ai/models/fal-ai/luma-dream-machine" target="_blank">Documentation</a>
+      Model: {{ state.selectedModel().name }} ({{ state.selectedModel().provider }}) -
+      <a href="https://fal.ai/models" target="_blank">Documentation</a>
     </p>
   </footer>
 </div>

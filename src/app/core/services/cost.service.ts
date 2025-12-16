@@ -1,35 +1,41 @@
 import { Injectable } from '@angular/core';
-import { environment } from '../../../environments/environment';
 import { CostEstimate, AspectRatio } from '../models/cost.model';
+import { VideoModelConfig, DEFAULT_MODEL } from '../constants/api.constants';
 
 @Injectable({
   providedIn: 'root'
 })
 export class CostService {
 
-  private pricing = environment.pricing;
+  /**
+   * Calculates the estimated cost for a generation using a specific model
+   */
+  calculateCostForModel(aspectRatio: AspectRatio | string, model: VideoModelConfig): CostEstimate {
+    return {
+      aspectRatio: aspectRatio as AspectRatio,
+      pricePerVideo: model.costPerVideo,
+      priceFormatted: this.formatPrice(model.costPerVideo),
+      currency: 'USD',
+      model: model.name,
+      provider: model.provider,
+      notes: this.getModelNotes(model)
+    };
+  }
 
   /**
-   * Calculates the estimated cost for a generation
-   * Luma Dream Machine has fixed pricing regardless of aspect ratio
+   * Calculates the estimated cost using default model (backwards compatibility)
    */
   calculateCost(aspectRatio: AspectRatio): CostEstimate {
-    return {
-      aspectRatio,
-      pricePerVideo: this.pricing.pricePerVideo,
-      priceFormatted: this.formatPrice(this.pricing.pricePerVideo),
-      currency: 'USD',
-      model: this.pricing.model,
-      provider: this.pricing.provider,
-      notes: this.getAspectRatioNotes(aspectRatio)
-    };
+    return this.calculateCostForModel(aspectRatio, DEFAULT_MODEL);
   }
 
   /**
    * Calculates cost for multiple generations
    */
-  calculateBatchCost(aspectRatio: AspectRatio, quantity: number): CostEstimate {
-    const singleCost = this.calculateCost(aspectRatio);
+  calculateBatchCost(aspectRatio: AspectRatio, quantity: number, model?: VideoModelConfig): CostEstimate {
+    const singleCost = model
+      ? this.calculateCostForModel(aspectRatio, model)
+      : this.calculateCost(aspectRatio);
     const totalPrice = singleCost.pricePerVideo * quantity;
 
     return {
@@ -48,24 +54,23 @@ export class CostService {
   }
 
   /**
-   * Notes based on aspect ratio
+   * Notes based on model characteristics
    */
-  private getAspectRatioNotes(aspectRatio: AspectRatio): string {
-    switch (aspectRatio) {
-      case '4:3':
-        return 'Classic - Ideal for game sprites';
-      case '3:4':
-        return 'Portrait classic';
-      case '16:9':
-        return 'Widescreen - Best for scenes';
-      case '9:16':
-        return 'Portrait - Mobile format';
-      case '21:9':
-        return 'Ultra-wide cinematic';
-      case '9:21':
-        return 'Ultra-tall portrait';
-      default:
-        return '';
+  private getModelNotes(model: VideoModelConfig): string {
+    const features: string[] = [];
+
+    if (model.supportsLoop) {
+      features.push('Loop support');
     }
+    if (!model.promptRequired) {
+      features.push('No prompt needed');
+    }
+    if (model.supportsNegativePrompt) {
+      features.push('Negative prompt');
+    }
+
+    return features.length > 0
+      ? `${model.description} - Features: ${features.join(', ')}`
+      : model.description;
   }
 }

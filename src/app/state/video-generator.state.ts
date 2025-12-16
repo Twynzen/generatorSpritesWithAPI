@@ -2,13 +2,15 @@ import { Injectable, signal, computed } from '@angular/core';
 import { ProcessedImage } from '../core/models/image-metadata.model';
 import { AspectRatio } from '../core/models/cost.model';
 import { VideoResult } from '../core/models/video-generation.model';
+import { VideoModelConfig, DEFAULT_MODEL } from '../core/constants/api.constants';
 
 export type GenerationStatus = 'idle' | 'uploading' | 'in_queue' | 'in_progress' | 'completed' | 'failed';
 
 export interface GeneratorState {
   spriteImage: ProcessedImage | null;
   prompt: string;
-  aspectRatio: AspectRatio;
+  aspectRatio: AspectRatio | string;
+  selectedModel: VideoModelConfig;
   status: GenerationStatus;
   progress: number;
   logs: string[];
@@ -24,7 +26,8 @@ export class VideoGeneratorState {
   private state = signal<GeneratorState>({
     spriteImage: null,
     prompt: '',
-    aspectRatio: '4:3', // Default 4:3 for sprites (Luma doesn't support 1:1)
+    aspectRatio: '4:3', // Default 4:3 for sprites
+    selectedModel: DEFAULT_MODEL,
     status: 'idle',
     progress: 0,
     logs: [],
@@ -36,6 +39,7 @@ export class VideoGeneratorState {
   readonly spriteImage = computed(() => this.state().spriteImage);
   readonly prompt = computed(() => this.state().prompt);
   readonly aspectRatio = computed(() => this.state().aspectRatio);
+  readonly selectedModel = computed(() => this.state().selectedModel);
   readonly status = computed(() => this.state().status);
   readonly progress = computed(() => this.state().progress);
   readonly logs = computed(() => this.state().logs);
@@ -45,9 +49,11 @@ export class VideoGeneratorState {
   // Computed: determine if ready to generate
   readonly canGenerate = computed(() => {
     const s = this.state();
+    // If model doesn't require prompt, only need image
+    const promptValid = !s.selectedModel.promptRequired || s.prompt.trim().length > 0;
     return (
       s.spriteImage !== null &&
-      s.prompt.trim().length > 0 &&
+      promptValid &&
       s.status === 'idle'
     );
   });
@@ -61,8 +67,12 @@ export class VideoGeneratorState {
     this.state.update(s => ({ ...s, prompt }));
   }
 
-  setAspectRatio(aspectRatio: AspectRatio): void {
+  setAspectRatio(aspectRatio: AspectRatio | string): void {
     this.state.update(s => ({ ...s, aspectRatio }));
+  }
+
+  setSelectedModel(model: VideoModelConfig): void {
+    this.state.update(s => ({ ...s, selectedModel: model }));
   }
 
   setStatus(status: GenerationStatus): void {
@@ -95,6 +105,7 @@ export class VideoGeneratorState {
       spriteImage: null,
       prompt: '',
       aspectRatio: '4:3',
+      selectedModel: DEFAULT_MODEL,
       status: 'idle',
       progress: 0,
       logs: [],

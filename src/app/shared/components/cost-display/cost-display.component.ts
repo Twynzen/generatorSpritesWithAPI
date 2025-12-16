@@ -13,7 +13,7 @@ import { CostEstimate, AspectRatio } from '../../../core/models/cost.model';
 export class CostDisplayComponent {
   // Inputs
   costEstimate = input.required<CostEstimate>();
-  aspectRatio = input<AspectRatio>('4:3');
+  aspectRatio = input<AspectRatio | string>('4:3');
 
   // Output when aspect ratio changes
   aspectRatioChange = output<AspectRatio>();

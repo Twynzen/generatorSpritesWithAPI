@@ -18,10 +18,12 @@ import { PromptEditorComponent } from '../../shared/components/prompt-editor/pro
 import { CostDisplayComponent } from '../../shared/components/cost-display/cost-display.component';
 import { VideoResultComponent } from '../../shared/components/video-result/video-result.component';
 import { ProgressIndicatorComponent } from '../../shared/components/progress-indicator/progress-indicator.component';
+import { ModelSelectorComponent } from '../../shared/components/model-selector/model-selector.component';
 
 // Models
 import { ImageMetadata } from '../../core/models/image-metadata.model';
 import { AspectRatio } from '../../core/models/cost.model';
+import { VideoModelConfig } from '../../core/constants/api.constants';
 
 @Component({
   selector: 'app-generator',
@@ -35,7 +37,8 @@ import { AspectRatio } from '../../core/models/cost.model';
     PromptEditorComponent,
     CostDisplayComponent,
     VideoResultComponent,
-    ProgressIndicatorComponent
+    ProgressIndicatorComponent,
+    ModelSelectorComponent
   ],
   templateUrl: './generator.component.html',
   styleUrls: ['./generator.component.scss']
@@ -52,9 +55,12 @@ export class GeneratorComponent {
   // Local state
   errorMessage: string | null = null;
 
-  // Computed cost
+  // Computed cost (now using selected model)
   get costEstimate() {
-    return this.costService.calculateCost(this.state.aspectRatio());
+    return this.costService.calculateCostForModel(
+      this.state.aspectRatio(),
+      this.state.selectedModel()
+    );
   }
 
   /**
@@ -93,6 +99,13 @@ export class GeneratorComponent {
   }
 
   /**
+   * Handles model selection change
+   */
+  onModelChange(model: VideoModelConfig): void {
+    this.state.setSelectedModel(model);
+  }
+
+  /**
    * Handles errors from child components
    */
   onError(message: string): void {
@@ -114,6 +127,7 @@ export class GeneratorComponent {
     if (!this.state.canGenerate()) return;
 
     const spriteImage = this.state.spriteImage()!;
+    const selectedModel = this.state.selectedModel();
 
     this.state.setStatus('uploading');
     this.state.setProgress(10);
@@ -128,15 +142,16 @@ export class GeneratorComponent {
           this.state.setProgress(30);
           this.state.addLog('Image uploaded successfully');
 
-          // 2. Start generation with Luma Dream Machine
+          // 2. Start generation with selected model
           this.state.setStatus('in_queue');
-          this.state.addLog('Sending generation request to Luma Dream Machine...');
+          this.state.addLog(`Sending generation request to ${selectedModel.name}...`);
 
           this.falApi.generateWithPolling({
             imageUrl: imageUrl,
             prompt: this.state.prompt(),
             aspectRatio: this.state.aspectRatio(),
-            loop: true // Always enable loop for sprite animations
+            loop: selectedModel.supportsLoop, // Use model's loop support
+            model: selectedModel
           }).subscribe({
             next: (result) => {
               console.log('Generation result:', result); // DEBUG
@@ -152,13 +167,15 @@ export class GeneratorComponent {
                 if (result.video) {
                   this.state.setResult(result.video);
                   this.state.addLog('Video generated successfully!');
-                  // Save to history
+                  // Save to history with model info
                   this.storageService.addToHistory({
                     prompt: this.state.prompt(),
                     aspectRatio: this.state.aspectRatio(),
                     cost: this.costEstimate.pricePerVideo,
                     videoUrl: result.video.url,
-                    spriteImageUrl: imageUrl
+                    spriteImageUrl: imageUrl,
+                    modelId: selectedModel.id,
+                    modelName: selectedModel.name
                   });
                 } else {
                   this.state.addLog('Completed but no video in response');

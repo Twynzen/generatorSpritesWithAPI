@@ -2,7 +2,6 @@ export const API_CONFIG = {
   FAL: {
     BASE_URL: 'https://queue.fal.run',
     UPLOAD_URL: 'https://fal.run/fal-ai/upload',
-    MODEL: 'fal-ai/wan-flf2v',
     POLLING_INTERVAL: 3000, // 3 seconds
     MAX_POLLING_ATTEMPTS: 100, // ~5 minutes max
     TIMEOUT: 300000 // 5 minutes
@@ -28,3 +27,288 @@ export const RESOLUTIONS = {
     description: 'High definition - Greater detail'
   }
 } as const;
+
+// ═══════════════════════════════════════════════════════════════
+// VIDEO MODELS CONFIGURATION
+// ═══════════════════════════════════════════════════════════════
+
+export type ModelTier = 'premium' | 'balanced' | 'economy';
+export type ModelQuality = 1 | 2 | 3 | 4 | 5;
+
+export interface VideoModelConfig {
+  id: string;
+  endpoint: string;
+  pollingEndpoint: string; // Base endpoint for polling (without /image-to-video)
+  name: string;
+  provider: string;
+  tier: ModelTier;
+  quality: ModelQuality;
+  estimatedTime: string;
+  costPerVideo: number;
+  costDisplay: string;
+  maxDuration: number;
+  aspectRatios: string[];
+  promptRequired: boolean;
+  supportsLoop: boolean;
+  supportsNegativePrompt: boolean;
+  description: string;
+  icon: string;
+}
+
+export const VIDEO_MODELS: VideoModelConfig[] = [
+  // ═══════════════════════════════════════════════════════════════
+  // PREMIUM TIER - Highest quality, cinematic results
+  // ═══════════════════════════════════════════════════════════════
+  {
+    id: 'kling-v2.1-master',
+    endpoint: 'fal-ai/kling-video/v2.1/master/image-to-video',
+    pollingEndpoint: 'fal-ai/kling-video/v2.1/master',
+    name: 'Kling v2.1 Master',
+    provider: 'Kuaishou',
+    tier: 'premium',
+    quality: 5,
+    estimatedTime: '3-5 min',
+    costPerVideo: 1.40,
+    costDisplay: '$1.40 (5s)',
+    maxDuration: 10,
+    aspectRatios: ['16:9', '9:16', '1:1'],
+    promptRequired: true,
+    supportsLoop: false,
+    supportsNegativePrompt: true,
+    description: 'Cinematic quality, best motion fluidity',
+    icon: '👑'
+  },
+  {
+    id: 'luma-ray-2',
+    endpoint: 'fal-ai/luma-dream-machine/ray-2/image-to-video',
+    pollingEndpoint: 'fal-ai/luma-dream-machine/ray-2',
+    name: 'Luma Ray 2',
+    provider: 'Luma AI',
+    tier: 'premium',
+    quality: 4,
+    estimatedTime: '2-3 min',
+    costPerVideo: 0.50,
+    costDisplay: '$0.50 (5s)',
+    maxDuration: 9,
+    aspectRatios: ['16:9', '9:16', '4:3', '3:4', '21:9', '9:21'],
+    promptRequired: true,
+    supportsLoop: true,
+    supportsNegativePrompt: false,
+    description: 'Seamless loops, variable duration',
+    icon: '⭐'
+  },
+  {
+    id: 'kling-v2.1-pro',
+    endpoint: 'fal-ai/kling-video/v2.1/pro/image-to-video',
+    pollingEndpoint: 'fal-ai/kling-video/v2.1/pro',
+    name: 'Kling v2.1 Pro',
+    provider: 'Kuaishou',
+    tier: 'premium',
+    quality: 4,
+    estimatedTime: '2-4 min',
+    costPerVideo: 0.45,
+    costDisplay: '$0.45 (5s)',
+    maxDuration: 10,
+    aspectRatios: ['16:9', '9:16', '1:1'],
+    promptRequired: true,
+    supportsLoop: false,
+    supportsNegativePrompt: true,
+    description: 'Enhanced visual fidelity',
+    icon: '🎬'
+  },
+
+  // ═══════════════════════════════════════════════════════════════
+  // BALANCED TIER - Good quality at reasonable cost
+  // ═══════════════════════════════════════════════════════════════
+  {
+    id: 'luma-dream-machine',
+    endpoint: 'fal-ai/luma-dream-machine/image-to-video',
+    pollingEndpoint: 'fal-ai/luma-dream-machine',
+    name: 'Luma Dream Machine v1.5',
+    provider: 'Luma AI',
+    tier: 'balanced',
+    quality: 4,
+    estimatedTime: '~2 min',
+    costPerVideo: 0.50,
+    costDisplay: '$0.50',
+    maxDuration: 5,
+    aspectRatios: ['16:9', '9:16', '4:3', '3:4', '21:9', '9:21'],
+    promptRequired: true,
+    supportsLoop: true,
+    supportsNegativePrompt: false,
+    description: 'Proven model, great for sprites',
+    icon: '✨'
+  },
+  {
+    id: 'minimax-video-01',
+    endpoint: 'fal-ai/minimax/video-01/image-to-video',
+    pollingEndpoint: 'fal-ai/minimax/video-01',
+    name: 'MiniMax Video-01',
+    provider: 'MiniMax/Hailuo',
+    tier: 'balanced',
+    quality: 4,
+    estimatedTime: '~2 min',
+    costPerVideo: 0.50,
+    costDisplay: '$0.50',
+    maxDuration: 6,
+    aspectRatios: ['16:9', '9:16', '1:1'],
+    promptRequired: true,
+    supportsLoop: false,
+    supportsNegativePrompt: false,
+    description: 'Camera movement control',
+    icon: '🎥'
+  },
+  {
+    id: 'kling-v2.1-standard',
+    endpoint: 'fal-ai/kling-video/v2.1/standard/image-to-video',
+    pollingEndpoint: 'fal-ai/kling-video/v2.1/standard',
+    name: 'Kling v2.1 Standard',
+    provider: 'Kuaishou',
+    tier: 'balanced',
+    quality: 3,
+    estimatedTime: '1-2 min',
+    costPerVideo: 0.25,
+    costDisplay: '$0.25 (5s)',
+    maxDuration: 10,
+    aspectRatios: ['16:9', '9:16', '1:1'],
+    promptRequired: true,
+    supportsLoop: false,
+    supportsNegativePrompt: true,
+    description: 'Cost-efficient Kling option',
+    icon: '⚡'
+  },
+  {
+    id: 'wan-i2v',
+    endpoint: 'fal-ai/wan-i2v',
+    pollingEndpoint: 'fal-ai/wan-i2v',
+    name: 'Wan 2.1 Image-to-Video',
+    provider: 'Wan',
+    tier: 'balanced',
+    quality: 3,
+    estimatedTime: '~1 min',
+    costPerVideo: 0.20,
+    costDisplay: '$0.20 (480p)',
+    maxDuration: 5,
+    aspectRatios: ['16:9', '9:16', '1:1', '4:3', '3:4'],
+    promptRequired: true,
+    supportsLoop: false,
+    supportsNegativePrompt: true,
+    description: 'Best value for quality',
+    icon: '💎'
+  },
+  {
+    id: 'luma-ray-2-flash',
+    endpoint: 'fal-ai/luma-dream-machine/ray-2-flash/image-to-video',
+    pollingEndpoint: 'fal-ai/luma-dream-machine/ray-2-flash',
+    name: 'Luma Ray 2 Flash',
+    provider: 'Luma AI',
+    tier: 'balanced',
+    quality: 3,
+    estimatedTime: '~1 min',
+    costPerVideo: 0.20,
+    costDisplay: '$0.20 (5s)',
+    maxDuration: 9,
+    aspectRatios: ['16:9', '9:16', '4:3', '3:4', '21:9', '9:21'],
+    promptRequired: true,
+    supportsLoop: true,
+    supportsNegativePrompt: false,
+    description: 'Fast Ray 2 variant, 60% cheaper',
+    icon: '⚡'
+  },
+  {
+    id: 'pika-v2.2',
+    endpoint: 'fal-ai/pika/v2.2/image-to-video',
+    pollingEndpoint: 'fal-ai/pika/v2.2',
+    name: 'Pika v2.2',
+    provider: 'Pika Labs',
+    tier: 'balanced',
+    quality: 3,
+    estimatedTime: '1-2 min',
+    costPerVideo: 0.20,
+    costDisplay: '$0.20 (720p)',
+    maxDuration: 5,
+    aspectRatios: ['16:9', '9:16', '1:1'],
+    promptRequired: true,
+    supportsLoop: false,
+    supportsNegativePrompt: false,
+    description: 'Dynamic video generation',
+    icon: '🎨'
+  },
+
+  // ═══════════════════════════════════════════════════════════════
+  // ECONOMY TIER - Fast and cheap for prototyping
+  // ═══════════════════════════════════════════════════════════════
+  {
+    id: 'stable-video',
+    endpoint: 'fal-ai/stable-video',
+    pollingEndpoint: 'fal-ai/stable-video',
+    name: 'Stable Video Diffusion',
+    provider: 'Stability AI',
+    tier: 'economy',
+    quality: 2,
+    estimatedTime: '~30s',
+    costPerVideo: 0.075,
+    costDisplay: '$0.075',
+    maxDuration: 4,
+    aspectRatios: ['input-based'],
+    promptRequired: false,
+    supportsLoop: false,
+    supportsNegativePrompt: false,
+    description: 'No prompt needed, motion control',
+    icon: '🚀'
+  },
+  {
+    id: 'fast-svd-lcm',
+    endpoint: 'fal-ai/fast-svd-lcm',
+    pollingEndpoint: 'fal-ai/fast-svd-lcm',
+    name: 'Fast SVD (LCM Turbo)',
+    provider: 'Stability AI',
+    tier: 'economy',
+    quality: 2,
+    estimatedTime: '~10s',
+    costPerVideo: 0.03,
+    costDisplay: '~$0.03',
+    maxDuration: 4,
+    aspectRatios: ['input-based'],
+    promptRequired: false,
+    supportsLoop: false,
+    supportsNegativePrompt: false,
+    description: 'Lightning fast, best for prototyping',
+    icon: '💨'
+  },
+  {
+    id: 'ltx-video',
+    endpoint: 'fal-ai/ltx-video/image-to-video',
+    pollingEndpoint: 'fal-ai/ltx-video',
+    name: 'LTX Video',
+    provider: 'Lightricks',
+    tier: 'economy',
+    quality: 2,
+    estimatedTime: '~20s',
+    costPerVideo: 0.04,
+    costDisplay: '$0.04',
+    maxDuration: 5,
+    aspectRatios: ['input-based'],
+    promptRequired: true,
+    supportsLoop: false,
+    supportsNegativePrompt: false,
+    description: 'Cheapest with prompts',
+    icon: '💰'
+  }
+];
+
+// Default model (the one currently working)
+export const DEFAULT_MODEL = VIDEO_MODELS.find(m => m.id === 'luma-dream-machine')!;
+
+// Utility functions
+export const getModelsByTier = (tier: ModelTier): VideoModelConfig[] =>
+  VIDEO_MODELS.filter(m => m.tier === tier);
+
+export const getModelById = (id: string): VideoModelConfig | undefined =>
+  VIDEO_MODELS.find(m => m.id === id);
+
+export const getModelsSortedByQuality = (): VideoModelConfig[] =>
+  [...VIDEO_MODELS].sort((a, b) => b.quality - a.quality);
+
+export const getModelsSortedByCost = (): VideoModelConfig[] =>
+  [...VIDEO_MODELS].sort((a, b) => a.costPerVideo - b.costPerVideo);
