@@ -204,28 +204,26 @@ export class FalApiService {
   }
 
   /**
-   * Status: GET to /{model-polling-endpoint}/requests/{id}/status
+   * Status: GET to status_url returned by submit
    * Returns HTTP 202 while processing, HTTP 200 when completed
    */
-  getStatus(requestId: string, model: VideoModelConfig): Observable<HttpResponse<FalStatusResponse>> {
-    return this.http.get<FalStatusResponse>(
-      `${this.baseUrl}/${model.pollingEndpoint}/requests/${requestId}/status`,
-      { observe: 'response' }
-    );
+  getStatus(statusUrl: string): Observable<HttpResponse<FalStatusResponse>> {
+    console.log(`[FalAPI] Polling status at: ${statusUrl}`);
+    return this.http.get<FalStatusResponse>(statusUrl, { observe: 'response' });
   }
 
   /**
-   * Result: GET to /{model-polling-endpoint}/requests/{id}
+   * Result: GET to response_url returned by submit
    * Video is in response.video.url
    */
-  getResult(requestId: string, model: VideoModelConfig): Observable<FalResultResponse> {
-    return this.http.get<FalResultResponse>(
-      `${this.baseUrl}/${model.pollingEndpoint}/requests/${requestId}`
-    );
+  getResult(responseUrl: string): Observable<FalResultResponse> {
+    console.log(`[FalAPI] Fetching result from: ${responseUrl}`);
+    return this.http.get<FalResultResponse>(responseUrl);
   }
 
   /**
    * Full flow: Submit → Poll Status → Get Result
+   * Uses URLs returned by FAL.ai API (status_url, response_url)
    */
   generateWithPolling(request: FalSubmitRequest): Observable<VideoGenerationResult> {
     const model = request.model || DEFAULT_MODEL;
@@ -233,16 +231,29 @@ export class FalApiService {
     return this.submitGeneration(request).pipe(
       switchMap(submitResponse => {
         const requestId = submitResponse.request_id;
-        console.log(`[FalAPI] Job submitted to ${model.name}, request_id:`, requestId);
+        const statusUrl = submitResponse.status_url;
+        const responseUrl = submitResponse.response_url;
+
+        console.log(`[FalAPI] Job submitted to ${model.name}:`, {
+          requestId,
+          statusUrl,
+          responseUrl
+        });
+
+        // Validate we got the required URLs
+        if (!statusUrl || !responseUrl) {
+          console.error('[FalAPI] Missing status_url or response_url in submit response');
+          throw new Error('FAL.ai did not return polling URLs');
+        }
 
         let pollCount = 0;
 
-        // Poll every 5 seconds
+        // Poll every 5 seconds using the status_url from the response
         return interval(5000).pipe(
           switchMap(() => {
             pollCount++;
             console.log(`[FalAPI] Polling ${model.name} status (attempt ${pollCount})...`);
-            return this.getStatus(requestId, model);
+            return this.getStatus(statusUrl);
           }),
           // Continue while HTTP status is 202 (processing)
           // Stop when HTTP status is 200 (completed)
@@ -252,10 +263,10 @@ export class FalApiService {
             return isProcessing;
           }, true), // inclusive: emit the 200 response too
           switchMap(response => {
-            // If completed (HTTP 200), fetch the result from separate endpoint
+            // If completed (HTTP 200), fetch the result from response_url
             if (response.status === 200) {
               console.log(`[FalAPI] ${model.name} completed! Fetching result...`);
-              return this.getResult(requestId, model).pipe(
+              return this.getResult(responseUrl).pipe(
                 map(result => {
                   console.log('[FalAPI] Result:', result);
                   return {
