@@ -4,21 +4,23 @@
     <span class="cost-price">{{ costEstimate().priceFormatted }}</span>
   </div>
 
-  <div class="resolution-selector">
-    <span class="selector-label">Aspect Ratio:</span>
-    <div class="resolution-options">
-      @for (ar of aspectRatios; track ar.value) {
-        <button
-          type="button"
-          class="resolution-btn"
-          [class.active]="aspectRatio() === ar.value"
-          (click)="onAspectRatioChange(ar.value)"
-        >
-          <span class="res-value">{{ ar.label }}</span>
-        </button>
-      }
+  @if (aspectRatios().length > 0) {
+    <div class="resolution-selector">
+      <span class="selector-label">Aspect Ratio:</span>
+      <div class="resolution-options">
+        @for (ar of aspectRatios(); track ar.value) {
+          <button
+            type="button"
+            class="resolution-btn"
+            [class.active]="aspectRatio() === ar.value"
+            (click)="onAspectRatioChange(ar.value)"
+          >
+            <span class="res-value">{{ ar.label }}</span>
+          </button>
+        }
+      </div>
     </div>
-  </div>
+  }
 
   <div class="cost-details">
     <div class="detail-row">

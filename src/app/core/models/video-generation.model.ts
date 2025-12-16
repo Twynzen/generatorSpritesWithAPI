@@ -83,6 +83,7 @@ export type VideoModelParams =
 
 export interface FalSubmitRequest {
   imageUrl: string;
+  endImageUrl?: string; // For models that support first/last frame (wan-flf2v)
   prompt: string;
   aspectRatio: AspectRatio | string;
   loop: boolean;

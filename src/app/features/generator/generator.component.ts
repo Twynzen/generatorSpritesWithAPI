@@ -85,6 +85,24 @@ export class GeneratorComponent {
   }
 
   /**
+   * Handles when end image is selected (for models that support it)
+   */
+  onEndImageSelected(event: { file: File; metadata: ImageMetadata }): void {
+    this.clearError();
+    this.state.setEndImage({
+      file: event.file,
+      metadata: event.metadata
+    });
+  }
+
+  /**
+   * Removes the end image
+   */
+  removeEndImage(): void {
+    this.state.setEndImage(null);
+  }
+
+  /**
    * Handles prompt change
    */
   onPromptChange(prompt: string): void {
@@ -127,67 +145,44 @@ export class GeneratorComponent {
     if (!this.state.canGenerate()) return;
 
     const spriteImage = this.state.spriteImage()!;
+    const endImage = this.state.endImage();
     const selectedModel = this.state.selectedModel();
+    const needsEndImage = selectedModel.supportsEndImage;
 
     this.state.setStatus('uploading');
     this.state.setProgress(10);
     this.state.setLogs([]);
 
     try {
-      // 1. Upload image to FAL storage (as base64)
-      this.state.addLog('Uploading sprite image...');
+      // 1. Upload start image
+      this.state.addLog(needsEndImage ? 'Uploading start frame...' : 'Uploading sprite image...');
 
       this.falApi.uploadImage(spriteImage.file).subscribe({
-        next: (imageUrl) => {
-          this.state.setProgress(30);
-          this.state.addLog('Image uploaded successfully');
+        next: (startImageUrl) => {
+          this.state.setProgress(needsEndImage ? 20 : 30);
+          this.state.addLog(needsEndImage ? 'Start frame uploaded' : 'Image uploaded successfully');
 
-          // 2. Start generation with selected model
-          this.state.setStatus('in_queue');
-          this.state.addLog(`Sending generation request to ${selectedModel.name}...`);
+          // 2. If model needs end image, upload it too
+          if (needsEndImage && endImage) {
+            this.state.addLog('Uploading end frame...');
 
-          this.falApi.generateWithPolling({
-            imageUrl: imageUrl,
-            prompt: this.state.prompt(),
-            aspectRatio: this.state.aspectRatio(),
-            loop: selectedModel.supportsLoop, // Use model's loop support
-            model: selectedModel
-          }).subscribe({
-            next: (result) => {
-              console.log('Generation result:', result); // DEBUG
-              if (result.status === 'in_queue') {
-                this.state.setStatus('in_queue');
-                this.state.setProgress(40);
-              } else if (result.status === 'in_progress') {
-                this.state.setStatus('in_progress');
-                this.state.setProgress(result.progress || 50);
-              } else if (result.status === 'completed') {
-                console.log('Video completed:', result.video); // DEBUG
-                this.state.setProgress(100);
-                if (result.video) {
-                  this.state.setResult(result.video);
-                  this.state.addLog('Video generated successfully!');
-                  // Save to history with model info
-                  this.storageService.addToHistory({
-                    prompt: this.state.prompt(),
-                    aspectRatio: this.state.aspectRatio(),
-                    cost: this.costEstimate.pricePerVideo,
-                    videoUrl: result.video.url,
-                    spriteImageUrl: imageUrl,
-                    modelId: selectedModel.id,
-                    modelName: selectedModel.name
-                  });
-                } else {
-                  this.state.addLog('Completed but no video in response');
-                  console.error('No video in result:', result);
-                }
+            this.falApi.uploadImage(endImage.file).subscribe({
+              next: (endImageUrl) => {
+                this.state.setProgress(30);
+                this.state.addLog('End frame uploaded');
+
+                // 3. Start generation with both images
+                this.startGeneration(selectedModel, startImageUrl, endImageUrl);
+              },
+              error: (error) => {
+                this.state.setError(error.message || 'End image upload error');
+                this.state.addLog(`Error uploading end frame: ${error.message}`);
               }
-            },
-            error: (error) => {
-              this.state.setError(error.message || 'Generation error');
-              this.state.addLog(`Error: ${error.message}`);
-            }
-          });
+            });
+          } else {
+            // Single image model - start generation
+            this.startGeneration(selectedModel, startImageUrl, undefined);
+          }
         },
         error: (error) => {
           this.state.setError(error.message || 'Upload error');
@@ -199,6 +194,58 @@ export class GeneratorComponent {
       this.state.setError(error.message || 'Unknown error');
       this.state.addLog(`Error: ${error.message}`);
     }
+  }
+
+  /**
+   * Starts the actual generation after images are uploaded
+   */
+  private startGeneration(selectedModel: VideoModelConfig, startImageUrl: string, endImageUrl?: string): void {
+    this.state.setStatus('in_queue');
+    this.state.addLog(`Sending generation request to ${selectedModel.name}...`);
+
+    this.falApi.generateWithPolling({
+      imageUrl: startImageUrl,
+      endImageUrl: endImageUrl, // Pass end image URL if available
+      prompt: this.state.prompt(),
+      aspectRatio: this.state.aspectRatio(),
+      loop: selectedModel.supportsLoop,
+      model: selectedModel
+    }).subscribe({
+      next: (result) => {
+        console.log('Generation result:', result);
+        if (result.status === 'in_queue') {
+          this.state.setStatus('in_queue');
+          this.state.setProgress(40);
+        } else if (result.status === 'in_progress') {
+          this.state.setStatus('in_progress');
+          this.state.setProgress(result.progress || 50);
+        } else if (result.status === 'completed') {
+          console.log('Video completed:', result.video);
+          this.state.setProgress(100);
+          if (result.video) {
+            this.state.setResult(result.video);
+            this.state.addLog('Video generated successfully!');
+            // Save to history with model info
+            this.storageService.addToHistory({
+              prompt: this.state.prompt(),
+              aspectRatio: this.state.aspectRatio(),
+              cost: this.costEstimate.pricePerVideo,
+              videoUrl: result.video.url,
+              spriteImageUrl: startImageUrl,
+              modelId: selectedModel.id,
+              modelName: selectedModel.name
+            });
+          } else {
+            this.state.addLog('Completed but no video in response');
+            console.error('No video in result:', result);
+          }
+        }
+      },
+      error: (error) => {
+        this.state.setError(error.message || 'Generation error');
+        this.state.addLog(`Error: ${error.message}`);
+      }
+    });
   }
 
   /**

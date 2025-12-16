@@ -110,7 +110,20 @@ export class FalApiService {
           prompt_optimizer: request.promptOptimizer ?? true
         };
 
-      // Wan 2.1
+      // Wan 2.1 First-Last Frame (requires TWO images)
+      case 'wan-flf2v':
+        return {
+          start_image_url: request.imageUrl,
+          end_image_url: request.endImageUrl,
+          prompt: request.prompt,
+          negative_prompt: request.negativePrompt ?? 'blur, distort, low quality, static',
+          resolution: request.resolution ?? '720p',
+          aspect_ratio: request.aspectRatio ?? 'auto',
+          num_frames: 81,
+          frames_per_second: request.fps ?? 16
+        };
+
+      // Wan 2.1 Image-to-Video (single image)
       case 'wan-i2v':
         return {
           ...payload,

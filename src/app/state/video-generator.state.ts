@@ -7,7 +7,8 @@ import { VideoModelConfig, DEFAULT_MODEL } from '../core/constants/api.constants
 export type GenerationStatus = 'idle' | 'uploading' | 'in_queue' | 'in_progress' | 'completed' | 'failed';
 
 export interface GeneratorState {
-  spriteImage: ProcessedImage | null;
+  spriteImage: ProcessedImage | null;  // Start/first frame image
+  endImage: ProcessedImage | null;     // End/last frame image (for models that support it)
   prompt: string;
   aspectRatio: AspectRatio | string;
   selectedModel: VideoModelConfig;
@@ -25,6 +26,7 @@ export class VideoGeneratorState {
   // State signals
   private state = signal<GeneratorState>({
     spriteImage: null,
+    endImage: null,
     prompt: '',
     aspectRatio: '4:3', // Default 4:3 for sprites
     selectedModel: DEFAULT_MODEL,
@@ -37,6 +39,7 @@ export class VideoGeneratorState {
 
   // Selectors (computed)
   readonly spriteImage = computed(() => this.state().spriteImage);
+  readonly endImage = computed(() => this.state().endImage);
   readonly prompt = computed(() => this.state().prompt);
   readonly aspectRatio = computed(() => this.state().aspectRatio);
   readonly selectedModel = computed(() => this.state().selectedModel);
@@ -46,13 +49,20 @@ export class VideoGeneratorState {
   readonly result = computed(() => this.state().result);
   readonly error = computed(() => this.state().error);
 
+  // Computed: does current model need end image?
+  readonly needsEndImage = computed(() => this.state().selectedModel.supportsEndImage);
+
   // Computed: determine if ready to generate
   readonly canGenerate = computed(() => {
     const s = this.state();
     // If model doesn't require prompt, only need image
     const promptValid = !s.selectedModel.promptRequired || s.prompt.trim().length > 0;
+    // If model supports end image, require both images
+    const imagesValid = s.selectedModel.supportsEndImage
+      ? (s.spriteImage !== null && s.endImage !== null)
+      : (s.spriteImage !== null);
     return (
-      s.spriteImage !== null &&
+      imagesValid &&
       promptValid &&
       s.status === 'idle'
     );
@@ -61,6 +71,10 @@ export class VideoGeneratorState {
   // Actions
   setSpriteImage(image: ProcessedImage | null): void {
     this.state.update(s => ({ ...s, spriteImage: image }));
+  }
+
+  setEndImage(image: ProcessedImage | null): void {
+    this.state.update(s => ({ ...s, endImage: image }));
   }
 
   setPrompt(prompt: string): void {
@@ -72,7 +86,17 @@ export class VideoGeneratorState {
   }
 
   setSelectedModel(model: VideoModelConfig): void {
-    this.state.update(s => ({ ...s, selectedModel: model }));
+    this.state.update(s => {
+      // Check if current aspect ratio is supported by the new model
+      const currentAspectRatio = s.aspectRatio;
+      const isSupported = model.aspectRatios.includes(currentAspectRatio) ||
+                          model.aspectRatios.includes('input-based');
+
+      // If not supported, use the first available aspect ratio for this model
+      const newAspectRatio = isSupported ? currentAspectRatio : model.aspectRatios[0];
+
+      return { ...s, selectedModel: model, aspectRatio: newAspectRatio };
+    });
   }
 
   setStatus(status: GenerationStatus): void {
@@ -103,6 +127,7 @@ export class VideoGeneratorState {
   reset(): void {
     this.state.set({
       spriteImage: null,
+      endImage: null,
       prompt: '',
       aspectRatio: '4:3',
       selectedModel: DEFAULT_MODEL,

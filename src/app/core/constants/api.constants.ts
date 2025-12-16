@@ -51,6 +51,7 @@ export interface VideoModelConfig {
   promptRequired: boolean;
   supportsLoop: boolean;
   supportsNegativePrompt: boolean;
+  supportsEndImage: boolean; // true = requires start + end image (first/last frame)
   description: string;
   icon: string;
 }
@@ -75,6 +76,7 @@ export const VIDEO_MODELS: VideoModelConfig[] = [
     promptRequired: true,
     supportsLoop: false,
     supportsNegativePrompt: true,
+    supportsEndImage: false,
     description: 'Cinematic quality, best motion fluidity',
     icon: '👑'
   },
@@ -94,6 +96,7 @@ export const VIDEO_MODELS: VideoModelConfig[] = [
     promptRequired: true,
     supportsLoop: true,
     supportsNegativePrompt: false,
+    supportsEndImage: false,
     description: 'Seamless loops, variable duration',
     icon: '⭐'
   },
@@ -113,6 +116,7 @@ export const VIDEO_MODELS: VideoModelConfig[] = [
     promptRequired: true,
     supportsLoop: false,
     supportsNegativePrompt: true,
+    supportsEndImage: false,
     description: 'Enhanced visual fidelity',
     icon: '🎬'
   },
@@ -136,6 +140,7 @@ export const VIDEO_MODELS: VideoModelConfig[] = [
     promptRequired: true,
     supportsLoop: true,
     supportsNegativePrompt: false,
+    supportsEndImage: false,
     description: 'Proven model, great for sprites',
     icon: '✨'
   },
@@ -155,6 +160,7 @@ export const VIDEO_MODELS: VideoModelConfig[] = [
     promptRequired: true,
     supportsLoop: false,
     supportsNegativePrompt: false,
+    supportsEndImage: false,
     description: 'Camera movement control',
     icon: '🎥'
   },
@@ -174,8 +180,30 @@ export const VIDEO_MODELS: VideoModelConfig[] = [
     promptRequired: true,
     supportsLoop: false,
     supportsNegativePrompt: true,
+    supportsEndImage: false,
     description: 'Cost-efficient Kling option',
     icon: '⚡'
+  },
+  // ── Wan Models (First/Last Frame support) ──
+  {
+    id: 'wan-flf2v',
+    endpoint: 'fal-ai/wan-flf2v',
+    pollingEndpoint: 'fal-ai/wan-flf2v',
+    name: 'Wan 2.1 First-Last Frame',
+    provider: 'Wan',
+    tier: 'balanced',
+    quality: 4,
+    estimatedTime: '~1-2 min',
+    costPerVideo: 0.40,
+    costDisplay: '$0.40 (720p)',
+    maxDuration: 5,
+    aspectRatios: ['auto', '16:9', '9:16', '1:1'],
+    promptRequired: true,
+    supportsLoop: false,
+    supportsNegativePrompt: true,
+    supportsEndImage: true, // Requires start + end image!
+    description: 'Perfect for walk cycles - interpolates between frames',
+    icon: '🎯'
   },
   {
     id: 'wan-i2v',
@@ -189,11 +217,12 @@ export const VIDEO_MODELS: VideoModelConfig[] = [
     costPerVideo: 0.20,
     costDisplay: '$0.20 (480p)',
     maxDuration: 5,
-    aspectRatios: ['16:9', '9:16', '1:1', '4:3', '3:4'],
+    aspectRatios: ['auto', '16:9', '9:16', '1:1'],
     promptRequired: true,
     supportsLoop: false,
     supportsNegativePrompt: true,
-    description: 'Best value for quality',
+    supportsEndImage: false,
+    description: 'Single image animation',
     icon: '💎'
   },
   {
@@ -212,6 +241,7 @@ export const VIDEO_MODELS: VideoModelConfig[] = [
     promptRequired: true,
     supportsLoop: true,
     supportsNegativePrompt: false,
+    supportsEndImage: false,
     description: 'Fast Ray 2 variant, 60% cheaper',
     icon: '⚡'
   },
@@ -231,6 +261,7 @@ export const VIDEO_MODELS: VideoModelConfig[] = [
     promptRequired: true,
     supportsLoop: false,
     supportsNegativePrompt: false,
+    supportsEndImage: false,
     description: 'Dynamic video generation',
     icon: '🎨'
   },
@@ -254,6 +285,7 @@ export const VIDEO_MODELS: VideoModelConfig[] = [
     promptRequired: false,
     supportsLoop: false,
     supportsNegativePrompt: false,
+    supportsEndImage: false,
     description: 'No prompt needed, motion control',
     icon: '🚀'
   },
@@ -273,6 +305,7 @@ export const VIDEO_MODELS: VideoModelConfig[] = [
     promptRequired: false,
     supportsLoop: false,
     supportsNegativePrompt: false,
+    supportsEndImage: false,
     description: 'Lightning fast, best for prototyping',
     icon: '💨'
   },
@@ -292,6 +325,7 @@ export const VIDEO_MODELS: VideoModelConfig[] = [
     promptRequired: true,
     supportsLoop: false,
     supportsNegativePrompt: false,
+    supportsEndImage: false,
     description: 'Cheapest with prompts',
     icon: '💰'
   }

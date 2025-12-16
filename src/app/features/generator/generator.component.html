@@ -26,14 +26,16 @@
   <main class="generator-content">
     <!-- Left Column: Inputs -->
     <section class="input-section">
-      <!-- Sprite Image -->
+      <!-- Sprite Image / Start Frame -->
       <div class="input-group">
-        <h2 class="section-title">1. Upload Your Sprite</h2>
+        <h2 class="section-title">
+          1. {{ state.needsEndImage() ? 'Upload Start Frame' : 'Upload Your Sprite' }}
+        </h2>
 
         @if (state.spriteImage(); as spriteImage) {
           <app-image-preview
             [metadata]="spriteImage.metadata"
-            label="Sprite Image"
+            [label]="state.needsEndImage() ? 'Start Frame' : 'Sprite Image'"
             (remove)="removeSpriteImage()"
           />
         } @else {
@@ -43,6 +45,29 @@
           />
         }
       </div>
+
+      <!-- End Frame (only for models that support it) -->
+      @if (state.needsEndImage() && state.spriteImage()) {
+        <div class="input-group">
+          <h2 class="section-title">1b. Upload End Frame</h2>
+          <p class="input-hint mb-3">
+            The AI will interpolate between start and end frames to create the animation
+          </p>
+
+          @if (state.endImage(); as endImage) {
+            <app-image-preview
+              [metadata]="endImage.metadata"
+              label="End Frame"
+              (remove)="removeEndImage()"
+            />
+          } @else {
+            <app-drop-zone
+              (fileSelected)="onEndImageSelected($event)"
+              (error)="onError($event)"
+            />
+          }
+        </div>
+      }
 
       <!-- Model Selection -->
       @if (state.spriteImage()) {
@@ -86,6 +111,7 @@
         <app-cost-display
           [costEstimate]="costEstimate"
           [aspectRatio]="state.aspectRatio()"
+          [supportedAspectRatios]="state.selectedModel().aspectRatios"
           (aspectRatioChange)="onAspectRatioChange($event)"
         />
       }
