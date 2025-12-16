@@ -1,7 +1,7 @@
-import { Component, input, output, signal } from '@angular/core';
+import { Component, input, output } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { CostEstimate, Resolution } from '../../../core/models/cost.model';
+import { CostEstimate, AspectRatio } from '../../../core/models/cost.model';
 
 @Component({
   selector: 'app-cost-display',
@@ -13,18 +13,20 @@ import { CostEstimate, Resolution } from '../../../core/models/cost.model';
 export class CostDisplayComponent {
   // Inputs
   costEstimate = input.required<CostEstimate>();
-  resolution = input<Resolution>('480p');
+  aspectRatio = input<AspectRatio>('4:3');
 
-  // Output when resolution changes
-  resolutionChange = output<Resolution>();
+  // Output when aspect ratio changes
+  aspectRatioChange = output<AspectRatio>();
 
-  // Available resolutions
-  readonly resolutions: { value: Resolution; label: string; description: string }[] = [
-    { value: '480p', label: '480p', description: 'Standard - Ideal for sprites' },
-    { value: '720p', label: '720p', description: 'High quality - Greater detail' }
+  // Available aspect ratios (Luma Dream Machine supported values)
+  readonly aspectRatios: { value: AspectRatio; label: string; description: string }[] = [
+    { value: '4:3', label: '4:3', description: 'Classic - Ideal for sprites' },
+    { value: '16:9', label: '16:9', description: 'Widescreen' },
+    { value: '9:16', label: '9:16', description: 'Portrait/Mobile' },
+    { value: '3:4', label: '3:4', description: 'Portrait classic' }
   ];
 
-  onResolutionChange(newResolution: Resolution): void {
-    this.resolutionChange.emit(newResolution);
+  onAspectRatioChange(newAspectRatio: AspectRatio): void {
+    this.aspectRatioChange.emit(newAspectRatio);
   }
 }

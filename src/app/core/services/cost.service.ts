@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { environment } from '../../../environments/environment';
-import { CostEstimate, Resolution } from '../models/cost.model';
+import { CostEstimate, AspectRatio } from '../models/cost.model';
 
 @Injectable({
   providedIn: 'root'
@@ -11,26 +11,25 @@ export class CostService {
 
   /**
    * Calculates the estimated cost for a generation
+   * Luma Dream Machine has fixed pricing regardless of aspect ratio
    */
-  calculateCost(resolution: Resolution): CostEstimate {
-    const pricePerVideo = this.pricing[resolution];
-
+  calculateCost(aspectRatio: AspectRatio): CostEstimate {
     return {
-      resolution,
-      pricePerVideo,
-      priceFormatted: this.formatPrice(pricePerVideo),
+      aspectRatio,
+      pricePerVideo: this.pricing.pricePerVideo,
+      priceFormatted: this.formatPrice(this.pricing.pricePerVideo),
       currency: 'USD',
-      model: 'Wan 2.1 FLF2V',
-      provider: 'FAL.ai',
-      notes: this.getCostNotes(resolution)
+      model: this.pricing.model,
+      provider: this.pricing.provider,
+      notes: this.getAspectRatioNotes(aspectRatio)
     };
   }
 
   /**
    * Calculates cost for multiple generations
    */
-  calculateBatchCost(resolution: Resolution, quantity: number): CostEstimate {
-    const singleCost = this.calculateCost(resolution);
+  calculateBatchCost(aspectRatio: AspectRatio, quantity: number): CostEstimate {
+    const singleCost = this.calculateCost(aspectRatio);
     const totalPrice = singleCost.pricePerVideo * quantity;
 
     return {
@@ -42,17 +41,6 @@ export class CostService {
   }
 
   /**
-   * Gets pricing info to show the user
-   */
-  getPricingInfo(): { resolution: Resolution; price: number; priceFormatted: string }[] {
-    return Object.entries(this.pricing).map(([resolution, price]) => ({
-      resolution: resolution as Resolution,
-      price,
-      priceFormatted: this.formatPrice(price)
-    }));
-  }
-
-  /**
    * Formats price to string
    */
   private formatPrice(price: number): string {
@@ -60,14 +48,22 @@ export class CostService {
   }
 
   /**
-   * Additional notes based on resolution
+   * Notes based on aspect ratio
    */
-  private getCostNotes(resolution: Resolution): string {
-    switch (resolution) {
-      case '480p':
-        return 'Standard resolution, ideal for 2D game sprites';
-      case '720p':
-        return 'High resolution, better quality but more expensive';
+  private getAspectRatioNotes(aspectRatio: AspectRatio): string {
+    switch (aspectRatio) {
+      case '4:3':
+        return 'Classic - Ideal for game sprites';
+      case '3:4':
+        return 'Portrait classic';
+      case '16:9':
+        return 'Widescreen - Best for scenes';
+      case '9:16':
+        return 'Portrait - Mobile format';
+      case '21:9':
+        return 'Ultra-wide cinematic';
+      case '9:21':
+        return 'Ultra-tall portrait';
       default:
         return '';
     }

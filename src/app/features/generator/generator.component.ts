@@ -2,7 +2,6 @@ import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
-import { forkJoin, switchMap, of } from 'rxjs';
 
 // Services
 import { FalApiService } from '../../core/services/fal-api.service';
@@ -21,8 +20,8 @@ import { VideoResultComponent } from '../../shared/components/video-result/video
 import { ProgressIndicatorComponent } from '../../shared/components/progress-indicator/progress-indicator.component';
 
 // Models
-import { ImageMetadata, ProcessedImage } from '../../core/models/image-metadata.model';
-import { Resolution } from '../../core/models/cost.model';
+import { ImageMetadata } from '../../core/models/image-metadata.model';
+import { AspectRatio } from '../../core/models/cost.model';
 
 @Component({
   selector: 'app-generator',
@@ -55,55 +54,27 @@ export class GeneratorComponent {
 
   // Computed cost
   get costEstimate() {
-    return this.costService.calculateCost(this.state.resolution());
+    return this.costService.calculateCost(this.state.aspectRatio());
   }
 
   /**
-   * Handles when first frame is selected
+   * Handles when sprite image is selected
    */
-  onFirstFrameSelected(event: { file: File; metadata: ImageMetadata }): void {
+  onSpriteImageSelected(event: { file: File; metadata: ImageMetadata }): void {
     this.clearError();
-    this.state.setFirstFrame({
+    this.state.setSpriteImage({
       file: event.file,
       metadata: event.metadata
     });
   }
 
   /**
-   * Handles when last frame is selected
+   * Removes the sprite image
    */
-  onLastFrameSelected(event: { file: File; metadata: ImageMetadata }): void {
-    this.clearError();
-    this.state.setLastFrame({
-      file: event.file,
-      metadata: event.metadata
-    });
-  }
-
-  /**
-   * Removes the first frame
-   */
-  removeFirstFrame(): void {
-    this.state.setFirstFrame(null);
+  removeSpriteImage(): void {
+    this.state.setSpriteImage(null);
     if (this.state.result()) {
       this.state.resetGeneration();
-    }
-  }
-
-  /**
-   * Removes the last frame
-   */
-  removeLastFrame(): void {
-    this.state.setLastFrame(null);
-  }
-
-  /**
-   * Toggle use same frame
-   */
-  onUseSameFrameChange(value: boolean): void {
-    this.state.setUseSameFrame(value);
-    if (value) {
-      this.state.setLastFrame(null);
     }
   }
 
@@ -115,10 +86,10 @@ export class GeneratorComponent {
   }
 
   /**
-   * Handles resolution change
+   * Handles aspect ratio change
    */
-  onResolutionChange(resolution: Resolution): void {
-    this.state.setResolution(resolution);
+  onAspectRatioChange(aspectRatio: AspectRatio): void {
+    this.state.setAspectRatio(aspectRatio);
   }
 
   /**
@@ -142,65 +113,57 @@ export class GeneratorComponent {
   async generateVideo(): Promise<void> {
     if (!this.state.canGenerate()) return;
 
-    const firstFrame = this.state.firstFrame()!;
-    const lastFrame = this.state.effectiveLastFrame()!;
+    const spriteImage = this.state.spriteImage()!;
 
     this.state.setStatus('uploading');
     this.state.setProgress(10);
     this.state.setLogs([]);
 
     try {
-      // 1. Upload images to FAL storage
-      this.state.addLog('Uploading images...');
+      // 1. Upload image to FAL storage (as base64)
+      this.state.addLog('Uploading sprite image...');
 
-      const uploads$ = this.state.useSameFrame()
-        ? this.falApi.uploadImage(firstFrame.file).pipe(
-            switchMap(url => of({ firstUrl: url, lastUrl: url }))
-          )
-        : forkJoin({
-            firstUrl: this.falApi.uploadImage(firstFrame.file),
-            lastUrl: this.falApi.uploadImage(lastFrame.file)
-          });
-
-      uploads$.subscribe({
-        next: (uploadedUrls) => {
+      this.falApi.uploadImage(spriteImage.file).subscribe({
+        next: (imageUrl) => {
           this.state.setProgress(30);
-          this.state.addLog('Images uploaded successfully');
+          this.state.addLog('Image uploaded successfully');
 
-          // 2. Start generation
+          // 2. Start generation with Luma Dream Machine
           this.state.setStatus('in_queue');
-          this.state.addLog('Sending generation request...');
+          this.state.addLog('Sending generation request to Luma Dream Machine...');
 
           this.falApi.generateWithPolling({
-            firstFrameUrl: uploadedUrls.firstUrl,
-            lastFrameUrl: uploadedUrls.lastUrl,
+            imageUrl: imageUrl,
             prompt: this.state.prompt(),
-            resolution: this.state.resolution()
+            aspectRatio: this.state.aspectRatio(),
+            loop: true // Always enable loop for sprite animations
           }).subscribe({
             next: (result) => {
+              console.log('Generation result:', result); // DEBUG
               if (result.status === 'in_queue') {
                 this.state.setStatus('in_queue');
                 this.state.setProgress(40);
               } else if (result.status === 'in_progress') {
                 this.state.setStatus('in_progress');
                 this.state.setProgress(result.progress || 50);
-                if (result.logs) {
-                  result.logs.forEach(log => this.state.addLog(log));
-                }
-              } else if (result.status === 'completed' && result.video) {
+              } else if (result.status === 'completed') {
+                console.log('Video completed:', result.video); // DEBUG
                 this.state.setProgress(100);
-                this.state.setResult(result.video);
-                this.state.addLog('Video generated successfully!');
-
-                // Save to history
-                this.storageService.addToHistory({
-                  prompt: this.state.prompt(),
-                  resolution: this.state.resolution(),
-                  cost: this.costEstimate.pricePerVideo,
-                  videoUrl: result.video.url,
-                  firstFrameUrl: uploadedUrls.firstUrl,
-                  lastFrameUrl: uploadedUrls.lastUrl
-                });
+                if (result.video) {
+                  this.state.setResult(result.video);
+                  this.state.addLog('Video generated successfully!');
+                  // Save to history
+                  this.storageService.addToHistory({
+                    prompt: this.state.prompt(),
+                    aspectRatio: this.state.aspectRatio(),
+                    cost: this.costEstimate.pricePerVideo,
+                    videoUrl: result.video.url,
+                    spriteImageUrl: imageUrl
+                  });
+                } else {
+                  this.state.addLog('Completed but no video in response');
+                  console.error('No video in result:', result);
+                }
               }
             },
             error: (error) => {

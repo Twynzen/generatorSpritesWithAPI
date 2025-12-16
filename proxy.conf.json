@@ -1,0 +1,11 @@
+{
+  "/api/fal": {
+    "target": "https://queue.fal.run",
+    "secure": true,
+    "changeOrigin": true,
+    "pathRewrite": {
+      "^/api/fal": ""
+    },
+    "logLevel": "debug"
+  }
+}

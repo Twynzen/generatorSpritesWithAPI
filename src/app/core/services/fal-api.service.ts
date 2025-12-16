@@ -1,14 +1,30 @@
 import { Injectable, inject } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
-import { Observable, interval, switchMap, takeWhile, map, of } from 'rxjs';
+import { HttpClient, HttpResponse } from '@angular/common/http';
+import { Observable, interval, switchMap, takeWhile, map, from, of } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import {
   FalSubmitRequest,
   FalSubmitResponse,
-  FalStatusResponse,
-  FalResultResponse,
   VideoGenerationResult
 } from '../models/video-generation.model';
+
+// Status response from /requests/{id}/status
+interface FalStatusResponse {
+  status: 'IN_QUEUE' | 'IN_PROGRESS' | 'COMPLETED';
+  queue_position?: number;
+  logs?: { message: string; level: string; timestamp: string }[];
+  metrics?: { inference_time?: number };
+}
+
+// Result response from /requests/{id} (separate endpoint)
+interface FalResultResponse {
+  video: {
+    url: string;
+    content_type?: string;
+    file_name?: string;
+    file_size?: number;
+  };
+}
 
 @Injectable({
   providedIn: 'root'
@@ -16,92 +32,105 @@ import {
 export class FalApiService {
   private http = inject(HttpClient);
   private baseUrl = environment.falApi.baseUrl;
-  private modelEndpoint = 'fal-ai/wan-flf2v';
+
+  // IMPORTANT: Submit path includes /image-to-video, but polling paths DON'T
+  private submitEndpoint = 'fal-ai/luma-dream-machine/image-to-video';
+  private pollingBaseEndpoint = 'fal-ai/luma-dream-machine'; // NO /image-to-video!
 
   /**
-   * Uploads an image to FAL.ai storage and returns the URL
-   * Required because FAL requires public URLs, not base64
+   * Converts a file to base64 data URI
    */
   uploadImage(file: File): Observable<string> {
-    const formData = new FormData();
-    formData.append('file', file);
-
-    return this.http.post<{ url: string }>(
-      `https://fal.run/fal-ai/upload`,
-      formData
-    ).pipe(
-      map(response => response.url)
-    );
+    return from(new Promise<string>((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(reader.result as string);
+      reader.onerror = () => reject(new Error('Failed to read file'));
+      reader.readAsDataURL(file);
+    }));
   }
 
   /**
-   * Submits a video generation job
+   * Submit: POST to /fal-ai/luma-dream-machine/image-to-video
    */
   submitGeneration(request: FalSubmitRequest): Observable<FalSubmitResponse> {
     return this.http.post<FalSubmitResponse>(
-      `${this.baseUrl}/${this.modelEndpoint}`,
+      `${this.baseUrl}/${this.submitEndpoint}`,
       {
-        input: {
-          first_frame_url: request.firstFrameUrl,
-          last_frame_url: request.lastFrameUrl,
-          prompt: request.prompt,
-          resolution: request.resolution,
-          negative_prompt: request.negativePrompt || 'ugly, blurry, distorted, bad quality'
-        }
+        prompt: request.prompt,
+        image_url: request.imageUrl,
+        aspect_ratio: request.aspectRatio,
+        loop: request.loop
       }
     );
   }
 
   /**
-   * Gets the status of a job
+   * Status: GET to /fal-ai/luma-dream-machine/requests/{id}/status
+   * Returns HTTP 202 while processing, HTTP 200 when completed
    */
-  getStatus(requestId: string): Observable<FalStatusResponse> {
+  getStatus(requestId: string): Observable<HttpResponse<FalStatusResponse>> {
     return this.http.get<FalStatusResponse>(
-      `${this.baseUrl}/${this.modelEndpoint}/status/${requestId}`
+      `${this.baseUrl}/${this.pollingBaseEndpoint}/requests/${requestId}/status`,
+      { observe: 'response' }
     );
   }
 
   /**
-   * Gets the result of a completed job
+   * Result: GET to /fal-ai/luma-dream-machine/requests/{id}
+   * Video is in response.video.url
    */
   getResult(requestId: string): Observable<FalResultResponse> {
     return this.http.get<FalResultResponse>(
-      `${this.baseUrl}/${this.modelEndpoint}/result/${requestId}`
+      `${this.baseUrl}/${this.pollingBaseEndpoint}/requests/${requestId}`
     );
   }
 
   /**
-   * Automatic polling until video is ready
-   * Returns Observable that emits progress and finally the result
+   * Full flow: Submit → Poll Status → Get Result
    */
   generateWithPolling(request: FalSubmitRequest): Observable<VideoGenerationResult> {
     return this.submitGeneration(request).pipe(
       switchMap(submitResponse => {
         const requestId = submitResponse.request_id;
+        console.log('Job submitted, request_id:', requestId);
 
-        // Poll every 3 seconds
-        return interval(3000).pipe(
-          switchMap(() => this.getStatus(requestId)),
-          takeWhile(status => status.status !== 'COMPLETED' && status.status !== 'FAILED', true),
-          switchMap(status => {
-            if (status.status === 'COMPLETED') {
+        let pollCount = 0;
+
+        // Poll every 5 seconds
+        return interval(5000).pipe(
+          switchMap(() => {
+            pollCount++;
+            console.log(`Polling status (attempt ${pollCount})...`);
+            return this.getStatus(requestId);
+          }),
+          // Continue while HTTP status is 202 (processing)
+          // Stop when HTTP status is 200 (completed)
+          takeWhile(response => {
+            const isProcessing = response.status === 202;
+            console.log(`HTTP ${response.status}, body status: ${response.body?.status}`);
+            return isProcessing;
+          }, true), // inclusive: emit the 200 response too
+          switchMap(response => {
+            // If completed (HTTP 200), fetch the result from separate endpoint
+            if (response.status === 200) {
+              console.log('Completed! Fetching result...');
               return this.getResult(requestId).pipe(
-                map(result => ({
-                  status: 'completed' as const,
-                  requestId,
-                  video: result.video,
-                  logs: status.logs
-                }))
+                map(result => {
+                  console.log('Result:', result);
+                  return {
+                    status: 'completed' as const,
+                    requestId,
+                    video: result.video // Video is directly in result.video
+                  };
+                })
               );
-            } else if (status.status === 'FAILED') {
-              throw new Error(status.error || 'Video generation failed');
             } else {
-              // IN_QUEUE or IN_PROGRESS
+              // Still processing (HTTP 202)
+              const statusData = response.body!;
               return of({
-                status: status.status.toLowerCase() as 'in_queue' | 'in_progress',
+                status: statusData.status === 'IN_QUEUE' ? 'in_queue' as const : 'in_progress' as const,
                 requestId,
-                progress: this.estimateProgress(status),
-                logs: status.logs
+                progress: this.estimateProgress(pollCount, statusData)
               });
             }
           })
@@ -111,15 +140,17 @@ export class FalApiService {
   }
 
   /**
-   * Estimates progress based on logs and time
+   * Estimates progress based on status and poll count
    */
-  private estimateProgress(status: FalStatusResponse): number {
-    if (status.status === 'IN_QUEUE') return 5;
-    if (status.status === 'IN_PROGRESS') {
-      // Based on logs, estimate progress
-      const logCount = status.logs?.length || 0;
-      return Math.min(10 + (logCount * 10), 90);
+  private estimateProgress(pollCount: number, status: FalStatusResponse): number {
+    if (status.status === 'IN_QUEUE') {
+      return Math.min(5 + pollCount, 20);
     }
-    return 0;
+    if (status.status === 'IN_PROGRESS') {
+      // Use logs count or poll count to estimate
+      const logProgress = status.logs?.length || 0;
+      return Math.min(20 + (pollCount * 5) + (logProgress * 2), 95);
+    }
+    return 95;
   }
 }

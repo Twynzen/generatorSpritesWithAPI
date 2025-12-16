@@ -26,74 +26,35 @@
   <main class="generator-content">
     <!-- Left Column: Inputs -->
     <section class="input-section">
-      <!-- First Frame -->
+      <!-- Sprite Image -->
       <div class="input-group">
-        <h2 class="section-title">1. Start Image</h2>
+        <h2 class="section-title">1. Upload Your Sprite</h2>
 
-        @if (state.firstFrame(); as firstFrame) {
+        @if (state.spriteImage(); as spriteImage) {
           <app-image-preview
-            [metadata]="firstFrame.metadata"
-            label="Initial Frame"
-            (remove)="removeFirstFrame()"
+            [metadata]="spriteImage.metadata"
+            label="Sprite Image"
+            (remove)="removeSpriteImage()"
           />
         } @else {
           <app-drop-zone
-            (fileSelected)="onFirstFrameSelected($event)"
+            (fileSelected)="onSpriteImageSelected($event)"
             (error)="onError($event)"
           />
         }
       </div>
 
-      <!-- Use Same Frame Toggle -->
-      @if (state.firstFrame()) {
-        <div class="toggle-group">
-          <label class="toggle-label">
-            <input
-              type="checkbox"
-              [checked]="state.useSameFrame()"
-              (change)="onUseSameFrameChange($any($event.target).checked)"
-              class="toggle-input"
-            />
-            <span class="toggle-text">
-              Use same image as final frame (perfect loop)
-            </span>
-          </label>
-          <p class="toggle-hint">
-            Recommended for walk cycles, idle, and other cyclic animations
-          </p>
-        </div>
-      }
-
-      <!-- Last Frame (if not using same frame) -->
-      @if (state.firstFrame() && !state.useSameFrame()) {
-        <div class="input-group">
-          <h2 class="section-title">2. Final Image (optional)</h2>
-
-          @if (state.lastFrame(); as lastFrame) {
-            <app-image-preview
-              [metadata]="lastFrame.metadata"
-              label="Final Frame"
-              (remove)="removeLastFrame()"
-            />
-          } @else {
-            <app-drop-zone
-              (fileSelected)="onLastFrameSelected($event)"
-              (error)="onError($event)"
-            />
-          }
-        </div>
-      }
-
       <!-- Prompt -->
-      @if (state.firstFrame()) {
+      @if (state.spriteImage()) {
         <div class="input-group">
-          <h2 class="section-title">
-            {{ state.useSameFrame() ? '2' : '3' }}. Describe the Animation
-          </h2>
+          <h2 class="section-title">2. Describe the Animation</h2>
           <app-prompt-editor
             [prompt]="state.prompt()"
             (promptChange)="onPromptChange($event)"
           />
+          <p class="input-hint">
+            Tip: Describe the movement you want, e.g., "Character walking cycle, smooth loop animation, side view"
+          </p>
         </div>
       }
     </section>
@@ -101,11 +62,11 @@
     <!-- Right Column: Cost & Actions -->
     <aside class="actions-section">
       <!-- Cost Display -->
-      @if (state.firstFrame()) {
+      @if (state.spriteImage()) {
         <app-cost-display
           [costEstimate]="costEstimate"
-          [resolution]="state.resolution()"
-          (resolutionChange)="onResolutionChange($event)"
+          [aspectRatio]="state.aspectRatio()"
+          (aspectRatioChange)="onAspectRatioChange($event)"
         />
       }
 
@@ -128,7 +89,7 @@
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
           </svg>
-          Generate Video
+          Generate Animation
         </button>
       }
 
@@ -142,7 +103,7 @@
       }
 
       <!-- Reset Button -->
-      @if (state.firstFrame() && state.status() === 'idle') {
+      @if (state.spriteImage() && state.status() === 'idle') {
         <button
           type="button"
           class="reset-btn"
@@ -158,8 +119,8 @@
   <footer class="page-footer">
     <p>
       Powered by <a href="https://fal.ai" target="_blank">FAL.ai</a> -
-      Model: Wan 2.1 FLF2V -
-      <a href="https://fal.ai/models/fal-ai/wan-flf2v" target="_blank">Documentation</a>
+      Model: Luma Dream Machine -
+      <a href="https://fal.ai/models/fal-ai/luma-dream-machine" target="_blank">Documentation</a>
     </p>
   </footer>
 </div>

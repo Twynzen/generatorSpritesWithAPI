@@ -1,25 +1,38 @@
-import { Resolution } from './cost.model';
+import { AspectRatio } from './cost.model';
 
-// Request for submit to FAL.ai
+// Request for submit to FAL.ai Luma Dream Machine
 export interface FalSubmitRequest {
-  firstFrameUrl: string;
-  lastFrameUrl: string;
+  imageUrl: string;
   prompt: string;
-  resolution: Resolution;
-  negativePrompt?: string;
+  aspectRatio: AspectRatio;
+  loop: boolean;
 }
 
 // Submit response
 export interface FalSubmitResponse {
   request_id: string;
-  status: string;
+  response_url?: string;
+  status_url?: string;
+  cancel_url?: string;
+}
+
+// Log entry from FAL
+export interface FalLogEntry {
+  timestamp: string;
+  message: string;
+  labels?: Record<string, string>;
 }
 
 // Status response
+// Note: FAILED status doesn't exist - errors come as HTTP 4xx/5xx
 export interface FalStatusResponse {
-  status: 'IN_QUEUE' | 'IN_PROGRESS' | 'COMPLETED' | 'FAILED';
-  logs?: string[];
-  error?: string;
+  status: 'IN_QUEUE' | 'IN_PROGRESS' | 'COMPLETED' | 'CANCELLATION_REQUESTED';
+  request_id?: string;
+  queue_position?: number;
+  logs?: FalLogEntry[];
+  metrics?: {
+    inference_time?: number;
+  };
 }
 
 // Result response
@@ -38,12 +51,11 @@ export interface VideoResult {
 
 // Generation state for UI
 export interface VideoGenerationResult {
-  status: 'in_queue' | 'in_progress' | 'completed' | 'failed';
+  status: 'in_queue' | 'in_progress' | 'completed';
   requestId: string;
   progress?: number;
   video?: VideoResult;
-  logs?: string[];
-  error?: string;
+  logs?: FalLogEntry[];
 }
 
 // History item
@@ -51,10 +63,9 @@ export interface GenerationHistoryItem {
   id: string;
   createdAt: Date;
   prompt: string;
-  resolution: Resolution;
+  aspectRatio: AspectRatio;
   cost: number;
   videoUrl: string;
   thumbnailUrl?: string;
-  firstFrameUrl: string;
-  lastFrameUrl: string;
+  spriteImageUrl: string;
 }

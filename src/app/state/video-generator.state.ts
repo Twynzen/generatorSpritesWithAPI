@@ -1,16 +1,14 @@
 import { Injectable, signal, computed } from '@angular/core';
 import { ProcessedImage } from '../core/models/image-metadata.model';
-import { Resolution } from '../core/models/cost.model';
+import { AspectRatio } from '../core/models/cost.model';
 import { VideoResult } from '../core/models/video-generation.model';
 
 export type GenerationStatus = 'idle' | 'uploading' | 'in_queue' | 'in_progress' | 'completed' | 'failed';
 
 export interface GeneratorState {
-  firstFrame: ProcessedImage | null;
-  lastFrame: ProcessedImage | null;
-  useSameFrame: boolean;
+  spriteImage: ProcessedImage | null;
   prompt: string;
-  resolution: Resolution;
+  aspectRatio: AspectRatio;
   status: GenerationStatus;
   progress: number;
   logs: string[];
@@ -24,11 +22,9 @@ export interface GeneratorState {
 export class VideoGeneratorState {
   // State signals
   private state = signal<GeneratorState>({
-    firstFrame: null,
-    lastFrame: null,
-    useSameFrame: true, // By default, use same image for loop
+    spriteImage: null,
     prompt: '',
-    resolution: '480p',
+    aspectRatio: '4:3', // Default 4:3 for sprites (Luma doesn't support 1:1)
     status: 'idle',
     progress: 0,
     logs: [],
@@ -37,11 +33,9 @@ export class VideoGeneratorState {
   });
 
   // Selectors (computed)
-  readonly firstFrame = computed(() => this.state().firstFrame);
-  readonly lastFrame = computed(() => this.state().lastFrame);
-  readonly useSameFrame = computed(() => this.state().useSameFrame);
+  readonly spriteImage = computed(() => this.state().spriteImage);
   readonly prompt = computed(() => this.state().prompt);
-  readonly resolution = computed(() => this.state().resolution);
+  readonly aspectRatio = computed(() => this.state().aspectRatio);
   readonly status = computed(() => this.state().status);
   readonly progress = computed(() => this.state().progress);
   readonly logs = computed(() => this.state().logs);
@@ -52,40 +46,23 @@ export class VideoGeneratorState {
   readonly canGenerate = computed(() => {
     const s = this.state();
     return (
-      s.firstFrame !== null &&
+      s.spriteImage !== null &&
       s.prompt.trim().length > 0 &&
       s.status === 'idle'
     );
   });
 
-  // Computed: effective frame for last_frame
-  readonly effectiveLastFrame = computed(() => {
-    const s = this.state();
-    if (s.useSameFrame) {
-      return s.firstFrame;
-    }
-    return s.lastFrame || s.firstFrame;
-  });
-
   // Actions
-  setFirstFrame(frame: ProcessedImage | null): void {
-    this.state.update(s => ({ ...s, firstFrame: frame }));
-  }
-
-  setLastFrame(frame: ProcessedImage | null): void {
-    this.state.update(s => ({ ...s, lastFrame: frame }));
-  }
-
-  setUseSameFrame(value: boolean): void {
-    this.state.update(s => ({ ...s, useSameFrame: value }));
+  setSpriteImage(image: ProcessedImage | null): void {
+    this.state.update(s => ({ ...s, spriteImage: image }));
   }
 
   setPrompt(prompt: string): void {
     this.state.update(s => ({ ...s, prompt }));
   }
 
-  setResolution(resolution: Resolution): void {
-    this.state.update(s => ({ ...s, resolution }));
+  setAspectRatio(aspectRatio: AspectRatio): void {
+    this.state.update(s => ({ ...s, aspectRatio }));
   }
 
   setStatus(status: GenerationStatus): void {
@@ -115,11 +92,9 @@ export class VideoGeneratorState {
   // Full reset
   reset(): void {
     this.state.set({
-      firstFrame: null,
-      lastFrame: null,
-      useSameFrame: true,
+      spriteImage: null,
       prompt: '',
-      resolution: '480p',
+      aspectRatio: '4:3',
       status: 'idle',
       progress: 0,
       logs: [],
@@ -128,7 +103,7 @@ export class VideoGeneratorState {
     });
   }
 
-  // Reset only generation (keep images and prompt)
+  // Reset only generation (keep image and prompt)
   resetGeneration(): void {
     this.state.update(s => ({
       ...s,

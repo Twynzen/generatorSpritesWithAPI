@@ -1,7 +1,7 @@
-export type Resolution = '480p' | '720p';
+export type AspectRatio = '16:9' | '9:16' | '4:3' | '3:4' | '21:9' | '9:21';
 
 export interface CostEstimate {
-  resolution: Resolution;
+  aspectRatio: AspectRatio;
   pricePerVideo: number;
   priceFormatted: string;
   currency: string;

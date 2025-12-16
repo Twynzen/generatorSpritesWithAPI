@@ -1,13 +1,16 @@
 export const environment = {
   production: false,
   falApi: {
-    baseUrl: 'https://queue.fal.run',
+    // Use proxy in development to avoid CORS
+    baseUrl: '/api/fal',
     // IMPORTANT: In production, use backend proxy
     // NEVER expose API key in production frontend
-    apiKey: 'YOUR_FAL_API_KEY_HERE'
+    apiKey: 'YOUR_FAL_API_KEY' // Get your key from https://fal.ai
   },
   pricing: {
-    '480p': 0.20,
-    '720p': 0.40
+    // Luma Dream Machine has fixed price per video
+    pricePerVideo: 0.50,
+    model: 'Luma Dream Machine',
+    provider: 'fal.ai'
   } as const
 };
