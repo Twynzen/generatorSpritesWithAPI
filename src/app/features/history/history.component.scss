@@ -77,6 +77,56 @@
   }
 }
 
+.header-actions {
+  @apply flex items-center gap-3;
+}
+
+.download-progress {
+  @apply text-sm font-mono;
+  color: #00ff41;
+  text-shadow: 0 0 10px rgba(0, 255, 65, 0.5);
+  animation: pulse 1s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+.action-header-btn {
+  @apply flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-mono transition-all duration-300;
+  color: #666;
+  border: 1px solid rgba(102, 102, 102, 0.3);
+  background: rgba(102, 102, 102, 0.05);
+
+  &:hover {
+    color: #00d4ff;
+    border-color: rgba(0, 212, 255, 0.5);
+    background: rgba(0, 212, 255, 0.1);
+    box-shadow: 0 0 15px rgba(0, 212, 255, 0.2);
+    text-shadow: 0 0 10px rgba(0, 212, 255, 0.5);
+  }
+}
+
+.download-all-btn {
+  @apply flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-mono transition-all duration-300;
+  color: #00ff41;
+  border: 1px solid rgba(0, 255, 65, 0.3);
+  background: rgba(0, 255, 65, 0.05);
+
+  &:hover:not(:disabled) {
+    background: rgba(0, 255, 65, 0.15);
+    border-color: #00ff41;
+    box-shadow: 0 0 20px rgba(0, 255, 65, 0.3);
+    text-shadow: 0 0 10px rgba(0, 255, 65, 0.5);
+  }
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: wait;
+  }
+}
+
 .clear-btn {
   @apply px-4 py-2 rounded-lg text-sm font-mono transition-all duration-300;
   color: #ff3333;
