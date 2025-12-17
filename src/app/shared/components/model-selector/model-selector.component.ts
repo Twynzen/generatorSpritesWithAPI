@@ -15,7 +15,8 @@ type SortMode = 'quality' | 'speed' | 'cost';
   selector: 'app-model-selector',
   standalone: true,
   imports: [CommonModule, FormsModule],
-  templateUrl: './model-selector.component.html'
+  templateUrl: './model-selector.component.html',
+  styleUrls: ['./model-selector.component.scss']
 })
 export class ModelSelectorComponent {
   @Input() set selectedModelId(value: string) {

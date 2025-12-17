@@ -1,42 +1,74 @@
 .image-preview {
-  @apply bg-surface-light rounded-xl overflow-hidden;
+  @apply rounded-lg overflow-hidden;
+  background: rgba(0, 0, 0, 0.6);
+  border: 1px solid rgba(0, 255, 65, 0.2);
 }
 
 .preview-header {
-  @apply flex items-center justify-between px-4 py-3 bg-slate-700/50;
+  @apply flex items-center justify-between px-4 py-3;
+  background: rgba(0, 255, 65, 0.05);
+  border-bottom: 1px solid rgba(0, 255, 65, 0.1);
 
   .label {
-    @apply text-sm font-medium text-slate-300;
+    @apply text-sm font-medium font-mono;
+    color: #00ff41;
+
+    &::before {
+      content: '// ';
+      color: #333;
+    }
   }
 
   .remove-btn {
-    @apply p-1 rounded-lg text-slate-400 hover:text-error hover:bg-error/10 transition-colors;
+    @apply p-1.5 rounded-lg transition-all duration-200;
+    color: #555;
+    border: 1px solid transparent;
+
+    &:hover {
+      color: #ff3333;
+      background: rgba(255, 51, 51, 0.1);
+      border-color: rgba(255, 51, 51, 0.3);
+    }
   }
 }
 
 .preview-image-container {
-  @apply p-4 flex justify-center items-center bg-[#0a0a0f];
+  @apply p-4 flex justify-center items-center;
+  background: #000;
   min-height: 150px;
   max-height: 250px;
+  position: relative;
+
+  &::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border: 1px solid rgba(0, 255, 65, 0.05);
+    pointer-events: none;
+  }
 }
 
 .preview-image {
   @apply max-w-full max-h-[200px] object-contain rounded;
   image-rendering: pixelated; // For pixel art sprites
+  filter: drop-shadow(0 0 10px rgba(0, 255, 65, 0.2));
 }
 
 .metadata-grid {
-  @apply grid grid-cols-2 gap-3 p-4 border-t border-slate-700/50;
+  @apply grid grid-cols-2 gap-3 p-4;
+  border-top: 1px solid rgba(0, 255, 65, 0.1);
 }
 
 .metadata-item {
   @apply flex flex-col;
 
   .metadata-label {
-    @apply text-xs text-slate-500 uppercase tracking-wider;
+    @apply text-xs uppercase tracking-wider font-mono;
+    color: #333;
   }
 
   .metadata-value {
-    @apply text-sm text-slate-200 font-medium mt-0.5;
+    @apply text-sm font-medium font-mono mt-0.5;
+    color: #888;
   }
 }

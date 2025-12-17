@@ -1,18 +1,24 @@
 .progress-indicator {
-  @apply bg-surface-light rounded-xl p-4 space-y-3;
+  @apply rounded-lg p-4 space-y-3 font-mono;
+  background: rgba(0, 0, 0, 0.6);
+  border: 1px solid rgba(0, 255, 65, 0.15);
+  backdrop-filter: blur(5px);
 
   &.in_progress,
   &.uploading,
   &.in_queue {
-    @apply border border-primary/30 bg-primary/5;
+    border-color: rgba(0, 255, 65, 0.4);
+    box-shadow: 0 0 20px rgba(0, 255, 65, 0.1), inset 0 0 30px rgba(0, 255, 65, 0.02);
   }
 
   &.completed {
-    @apply border border-success/30 bg-success/5;
+    border-color: rgba(0, 255, 65, 0.5);
+    box-shadow: 0 0 25px rgba(0, 255, 65, 0.15);
   }
 
   &.failed {
-    @apply border border-error/30 bg-error/5;
+    border-color: rgba(255, 51, 51, 0.5);
+    box-shadow: 0 0 20px rgba(255, 51, 51, 0.1);
   }
 }
 
@@ -24,40 +30,74 @@
   .in_progress &,
   .uploading &,
   .in_queue & {
-    @apply text-primary;
+    color: #00ff41;
+    filter: drop-shadow(0 0 5px #00ff41);
   }
 
   .completed & {
-    @apply text-success;
+    color: #00ff41;
+    filter: drop-shadow(0 0 8px #00ff41);
   }
 
   .failed & {
-    @apply text-error;
+    color: #ff3333;
+    filter: drop-shadow(0 0 5px #ff3333);
   }
 }
 
 .status-text {
-  @apply text-sm font-medium text-slate-200;
+  @apply text-sm font-medium font-mono tracking-wide;
+  color: #888;
+
+  .in_progress &,
+  .uploading &,
+  .in_queue & {
+    color: #00ff41;
+    text-shadow: 0 0 10px rgba(0, 255, 65, 0.3);
+  }
+
+  .completed & {
+    color: #00ff41;
+  }
+
+  .failed & {
+    color: #ff3333;
+  }
 }
 
 .progress-bar-container {
-  @apply h-2 bg-slate-700 rounded-full overflow-hidden;
+  @apply h-2 rounded-full overflow-hidden;
+  background: rgba(0, 255, 65, 0.1);
 }
 
 .progress-bar {
-  @apply h-full bg-primary rounded-full transition-all duration-300;
+  @apply h-full rounded-full transition-all duration-300;
+  background: linear-gradient(90deg, #00cc33, #00ff41, #39ff14);
+  box-shadow: 0 0 10px #00ff41, 0 0 20px rgba(0, 255, 65, 0.5);
 }
 
 .progress-percent {
-  @apply text-xs text-slate-400 text-right block;
+  @apply text-xs text-right block font-mono;
+  color: #00ff41;
 }
 
 .logs-container {
-  @apply pt-2 border-t border-slate-700/50;
+  @apply pt-2;
+  border-top: 1px solid rgba(0, 255, 65, 0.1);
 }
 
 .logs-summary {
-  @apply text-xs text-slate-500 cursor-pointer hover:text-slate-400;
+  @apply text-xs cursor-pointer font-mono transition-colors;
+  color: #444;
+
+  &:hover {
+    color: #00ff41;
+  }
+
+  &::before {
+    content: '> ';
+    color: #00ff41;
+  }
 }
 
 .logs-list {
@@ -65,5 +105,13 @@
 }
 
 .log-item {
-  @apply text-xs text-slate-400 font-mono bg-slate-800/50 px-2 py-1 rounded;
+  @apply text-xs font-mono px-3 py-1.5 rounded;
+  background: rgba(0, 0, 0, 0.5);
+  border-left: 2px solid rgba(0, 255, 65, 0.3);
+  color: #666;
+
+  &:last-child {
+    color: #00ff41;
+    border-left-color: #00ff41;
+  }
 }

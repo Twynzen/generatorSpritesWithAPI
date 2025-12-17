@@ -6,14 +6,16 @@
   @apply flex items-center justify-between;
 
   .prompt-label {
-    @apply text-sm font-medium text-slate-300;
+    @apply text-sm font-medium font-mono;
+    color: #666;
   }
 
   .char-count {
-    @apply text-xs text-slate-500;
+    @apply text-xs font-mono;
+    color: #444;
 
     &.warning {
-      @apply text-warning;
+      color: #ffb800;
     }
   }
 }
@@ -22,7 +24,13 @@
   @apply space-y-2;
 
   .templates-label {
-    @apply text-xs text-slate-500;
+    @apply text-xs font-mono;
+    color: #333;
+
+    &::before {
+      content: '// ';
+      color: #00ff41;
+    }
   }
 }
 
@@ -31,12 +39,22 @@
 }
 
 .template-btn {
-  @apply flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm;
-  @apply bg-slate-700/50 text-slate-300 border border-slate-600/50;
-  @apply hover:bg-slate-700 hover:border-slate-500 transition-all;
+  @apply flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-mono;
+  @apply transition-all duration-300;
+  background: rgba(0, 0, 0, 0.4);
+  border: 1px solid rgba(0, 255, 65, 0.1);
+  color: #555;
+
+  &:hover:not(.active) {
+    border-color: rgba(0, 255, 65, 0.3);
+    color: #888;
+  }
 
   &.active {
-    @apply bg-primary/20 text-primary border-primary/50;
+    background: rgba(0, 255, 65, 0.05);
+    border-color: #00ff41;
+    color: #00ff41;
+    box-shadow: 0 0 15px rgba(0, 255, 65, 0.15);
   }
 
   .template-icon {
@@ -53,27 +71,56 @@
 }
 
 .prompt-textarea {
-  @apply w-full px-4 py-3 rounded-xl resize-none;
-  @apply bg-surface-light border border-slate-600/50 text-slate-200;
-  @apply placeholder:text-slate-500;
-  @apply focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary;
-  @apply transition-all;
+  @apply w-full px-4 py-3 rounded-lg resize-none font-mono text-sm;
+  background: rgba(0, 0, 0, 0.6);
+  border: 1px solid rgba(0, 255, 65, 0.2);
+  color: #e0e0e0;
+  transition: all 0.3s ease;
+
+  &::placeholder {
+    color: #333;
+  }
+
+  &:focus {
+    outline: none;
+    border-color: #00ff41;
+    box-shadow: 0 0 20px rgba(0, 255, 65, 0.15), inset 0 0 15px rgba(0, 255, 65, 0.03);
+  }
 }
 
 .clear-btn {
-  @apply absolute top-3 right-3 p-1 rounded;
-  @apply text-slate-500 hover:text-slate-300 hover:bg-slate-700;
-  @apply transition-colors;
+  @apply absolute top-3 right-3 p-1 rounded transition-all duration-200;
+  color: #444;
+
+  &:hover {
+    color: #888;
+    background: rgba(255, 255, 255, 0.05);
+  }
 }
 
 .prompt-tips {
-  @apply p-3 rounded-lg bg-slate-800/50 border border-slate-700/50;
+  @apply p-3 rounded-lg font-mono;
+  background: rgba(0, 0, 0, 0.4);
+  border: 1px solid rgba(0, 255, 65, 0.08);
 
   .tip-title {
-    @apply text-xs font-medium text-slate-400 mb-2;
+    @apply text-xs font-medium mb-2;
+    color: #00ff41;
+    opacity: 0.7;
+
+    &::before {
+      content: '> ';
+    }
   }
 
   .tip-list {
-    @apply text-xs text-slate-500 space-y-1 list-disc list-inside;
+    @apply text-xs space-y-1 list-none;
+    color: #444;
+
+    li::before {
+      content: '- ';
+      color: #00ff41;
+      opacity: 0.5;
+    }
   }
 }

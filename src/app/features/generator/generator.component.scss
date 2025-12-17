@@ -1,37 +1,107 @@
 .generator-page {
-  @apply min-h-screen bg-surface;
+  @apply min-h-screen;
+  background: #000;
+  position: relative;
+
+  // Matrix grid overlay
+  &::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-image:
+      linear-gradient(rgba(0, 255, 65, 0.02) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0, 255, 65, 0.02) 1px, transparent 1px);
+    background-size: 40px 40px;
+    pointer-events: none;
+    z-index: 0;
+  }
 }
 
 .page-header {
-  @apply flex items-center justify-between px-6 py-4 bg-surface-light border-b border-slate-700/50;
+  @apply flex items-center justify-between px-6 py-4;
+  background: rgba(0, 0, 0, 0.8);
+  border-bottom: 1px solid rgba(0, 255, 65, 0.2);
+  backdrop-filter: blur(10px);
+  position: relative;
+  z-index: 10;
+
+  &::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, #00ff41, transparent);
+    opacity: 0.5;
+  }
 }
 
 .header-content {
   .page-title {
-    @apply text-2xl font-bold text-slate-100;
+    @apply text-2xl font-bold font-mono tracking-wider;
+    color: #00ff41;
+    text-shadow: 0 0 20px rgba(0, 255, 65, 0.5);
+    letter-spacing: 0.1em;
   }
 
   .page-subtitle {
-    @apply text-sm text-slate-400 mt-1;
+    @apply text-sm font-mono mt-1;
+    color: #666;
   }
 }
 
 .history-link {
-  @apply px-4 py-2 rounded-lg bg-slate-700/50 text-slate-300;
-  @apply hover:bg-slate-700 transition-colors;
+  @apply px-4 py-2 rounded-lg font-mono text-sm transition-all duration-300;
+  background: rgba(0, 255, 65, 0.05);
+  border: 1px solid rgba(0, 255, 65, 0.2);
+  color: #00ff41;
+
+  &:hover {
+    background: rgba(0, 255, 65, 0.1);
+    border-color: #00ff41;
+    box-shadow: 0 0 20px rgba(0, 255, 65, 0.2);
+    text-shadow: 0 0 10px #00ff41;
+  }
 }
 
 .error-banner {
-  @apply flex items-center justify-between px-6 py-3 bg-error/10 border-b border-error/30;
-  @apply text-error text-sm;
+  @apply flex items-center justify-between px-6 py-4;
+  background: rgba(255, 51, 51, 0.1);
+  border-bottom: 1px solid rgba(255, 51, 51, 0.3);
+  color: #ff3333;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.875rem;
+  position: relative;
+  z-index: 10;
+  animation: fade-in 0.3s ease-out;
+
+  &::before {
+    content: '[ERROR]';
+    color: #ff3333;
+    margin-right: 0.75rem;
+    font-weight: 600;
+  }
 
   button {
-    @apply text-error hover:text-error/80 text-xl leading-none;
+    @apply px-3 py-1 rounded transition-all duration-200;
+    color: #ff3333;
+    border: 1px solid rgba(255, 51, 51, 0.3);
+
+    &:hover {
+      background: rgba(255, 51, 51, 0.2);
+      border-color: #ff3333;
+    }
   }
 }
 
 .generator-content {
   @apply grid grid-cols-1 lg:grid-cols-3 gap-6 p-6;
+  position: relative;
+  z-index: 1;
 }
 
 .input-section {
@@ -43,44 +113,110 @@
 }
 
 .input-group {
-  @apply space-y-3;
+  @apply space-y-3 p-5 rounded-lg;
+  background: rgba(0, 0, 0, 0.6);
+  border: 1px solid rgba(0, 255, 65, 0.15);
+  backdrop-filter: blur(5px);
+  transition: all 0.3s ease;
+
+  &:hover {
+    border-color: rgba(0, 255, 65, 0.25);
+    box-shadow: 0 0 30px rgba(0, 255, 65, 0.05);
+  }
 }
 
 .section-title {
-  @apply text-lg font-semibold text-slate-200;
+  @apply text-lg font-semibold font-mono tracking-wide;
+  color: #00ff41;
+  text-shadow: 0 0 10px rgba(0, 255, 65, 0.3);
+
+  &::before {
+    content: '// ';
+    color: #444;
+  }
+}
+
+.input-hint {
+  @apply text-xs font-mono;
+  color: #555;
+
+  &::before {
+    content: '> ';
+    color: #00ff41;
+  }
 }
 
 .toggle-group {
-  @apply p-4 rounded-xl bg-surface-light;
+  @apply p-4 rounded-lg;
+  background: rgba(0, 0, 0, 0.4);
+  border: 1px solid rgba(0, 255, 65, 0.1);
 
   .toggle-label {
     @apply flex items-center gap-3 cursor-pointer;
   }
 
   .toggle-input {
-    @apply w-5 h-5 rounded accent-primary;
+    @apply w-5 h-5 rounded;
+    accent-color: #00ff41;
   }
 
   .toggle-text {
-    @apply text-sm text-slate-200;
+    @apply text-sm font-mono;
+    color: #888;
   }
 
   .toggle-hint {
-    @apply text-xs text-slate-500 mt-2 ml-8;
+    @apply text-xs mt-2 ml-8;
+    color: #444;
   }
 }
 
 .generate-btn {
-  @apply w-full flex items-center justify-center gap-2 px-6 py-4 rounded-xl;
-  @apply bg-primary text-white font-semibold text-lg;
-  @apply hover:bg-primary-dark transition-all;
-  @apply disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-primary;
+  @apply w-full flex items-center justify-center gap-3 px-6 py-4 rounded-lg;
+  @apply font-mono font-semibold text-lg tracking-wider;
+  @apply transition-all duration-300;
+  background: linear-gradient(135deg, #00cc33 0%, #00ff41 50%, #00cc33 100%);
+  background-size: 200% 200%;
+  border: 1px solid #00ff41;
+  color: #000;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+
+  &:hover:not(:disabled) {
+    background-position: 100% 100%;
+    box-shadow: 0 0 40px rgba(0, 255, 65, 0.5), inset 0 0 20px rgba(255, 255, 255, 0.1);
+    transform: translateY(-2px);
+  }
+
+  &:active:not(:disabled) {
+    transform: translateY(0);
+  }
+
+  &:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+    background: #1a1a1a;
+    color: #444;
+    border-color: #333;
+    box-shadow: none;
+  }
+
+  svg {
+    filter: drop-shadow(0 0 5px currentColor);
+  }
 }
 
 .reset-btn {
-  @apply w-full px-4 py-2 rounded-lg text-sm;
-  @apply text-slate-400 hover:text-slate-200 hover:bg-slate-700/50;
-  @apply transition-colors;
+  @apply w-full px-4 py-2 rounded-lg text-sm font-mono;
+  @apply transition-all duration-200;
+  color: #555;
+  border: 1px solid transparent;
+
+  &:hover {
+    color: #888;
+    border-color: rgba(255, 255, 255, 0.1);
+    background: rgba(255, 255, 255, 0.02);
+  }
 }
 
 .error-actions {
@@ -88,22 +224,90 @@
 }
 
 .retry-btn {
-  @apply w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl;
-  @apply bg-amber-600 text-white font-medium;
-  @apply hover:bg-amber-500 transition-all;
+  @apply w-full flex items-center justify-center gap-2 px-4 py-3 rounded-lg;
+  @apply font-mono font-medium tracking-wide transition-all duration-300;
+  background: linear-gradient(135deg, rgba(255, 184, 0, 0.2) 0%, rgba(255, 184, 0, 0.1) 100%);
+  border: 1px solid rgba(255, 184, 0, 0.5);
+  color: #ffb800;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+
+  &:hover {
+    background: linear-gradient(135deg, rgba(255, 184, 0, 0.3) 0%, rgba(255, 184, 0, 0.2) 100%);
+    border-color: #ffb800;
+    box-shadow: 0 0 25px rgba(255, 184, 0, 0.3);
+    text-shadow: 0 0 10px #ffb800;
+  }
+
+  svg {
+    animation: spin 2s linear infinite;
+    animation-play-state: paused;
+  }
+
+  &:hover svg {
+    animation-play-state: running;
+  }
 }
 
 .change-model-btn {
-  @apply w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl;
-  @apply bg-slate-700 text-slate-200 font-medium;
-  @apply hover:bg-slate-600 transition-all;
+  @apply w-full flex items-center justify-center gap-2 px-4 py-3 rounded-lg;
+  @apply font-mono font-medium tracking-wide transition-all duration-300;
+  background: rgba(0, 212, 255, 0.05);
+  border: 1px solid rgba(0, 212, 255, 0.3);
+  color: #00d4ff;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+
+  &:hover {
+    background: rgba(0, 212, 255, 0.1);
+    border-color: #00d4ff;
+    box-shadow: 0 0 25px rgba(0, 212, 255, 0.2);
+    text-shadow: 0 0 10px #00d4ff;
+  }
 }
 
 .page-footer {
-  @apply px-6 py-4 border-t border-slate-700/50 text-center;
-  @apply text-xs text-slate-500;
+  @apply px-6 py-4 text-center font-mono;
+  border-top: 1px solid rgba(0, 255, 65, 0.1);
+  background: rgba(0, 0, 0, 0.6);
+  font-size: 0.75rem;
+  color: #444;
+  position: relative;
+  z-index: 10;
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(0, 255, 65, 0.2), transparent);
+  }
 
   a {
-    @apply text-primary hover:underline;
+    color: #00ff41;
+    transition: all 0.2s ease;
+
+    &:hover {
+      color: #39ff14;
+      text-shadow: 0 0 10px rgba(0, 255, 65, 0.5);
+    }
+  }
+}
+
+// Animations
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
   }
 }

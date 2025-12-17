@@ -1,9 +1,43 @@
 .history-page {
-  @apply min-h-screen bg-surface;
+  @apply min-h-screen;
+  background: #000;
+  position: relative;
+
+  // Matrix grid overlay
+  &::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-image:
+      linear-gradient(rgba(0, 255, 65, 0.02) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0, 255, 65, 0.02) 1px, transparent 1px);
+    background-size: 40px 40px;
+    pointer-events: none;
+    z-index: 0;
+  }
 }
 
 .page-header {
-  @apply flex items-center justify-between px-6 py-4 bg-surface-light border-b border-slate-700/50;
+  @apply flex items-center justify-between px-6 py-4;
+  background: rgba(0, 0, 0, 0.8);
+  border-bottom: 1px solid rgba(0, 255, 65, 0.2);
+  backdrop-filter: blur(10px);
+  position: relative;
+  z-index: 10;
+
+  &::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, #00ff41, transparent);
+    opacity: 0.5;
+  }
 }
 
 .header-content {
@@ -11,36 +45,89 @@
 }
 
 .back-link {
-  @apply flex items-center gap-2 text-slate-400 hover:text-slate-200 transition-colors;
+  @apply flex items-center gap-2 px-3 py-2 rounded-lg font-mono text-sm transition-all duration-300;
+  color: #666;
+  border: 1px solid transparent;
+
+  &:hover {
+    color: #00ff41;
+    border-color: rgba(0, 255, 65, 0.2);
+    background: rgba(0, 255, 65, 0.05);
+    text-shadow: 0 0 10px rgba(0, 255, 65, 0.5);
+  }
+
+  svg {
+    transition: transform 0.2s ease;
+  }
+
+  &:hover svg {
+    transform: translateX(-3px);
+  }
 }
 
 .page-title {
-  @apply text-xl font-bold text-slate-100;
+  @apply text-xl font-bold font-mono tracking-wider;
+  color: #00ff41;
+  text-shadow: 0 0 20px rgba(0, 255, 65, 0.5);
+  letter-spacing: 0.1em;
+
+  &::before {
+    content: '> ';
+    color: #444;
+  }
 }
 
 .clear-btn {
-  @apply px-4 py-2 rounded-lg text-sm;
-  @apply text-error hover:bg-error/10 transition-colors;
+  @apply px-4 py-2 rounded-lg text-sm font-mono transition-all duration-300;
+  color: #ff3333;
+  border: 1px solid rgba(255, 51, 51, 0.3);
+  background: rgba(255, 51, 51, 0.05);
+
+  &:hover {
+    background: rgba(255, 51, 51, 0.1);
+    border-color: #ff3333;
+    box-shadow: 0 0 20px rgba(255, 51, 51, 0.2);
+    text-shadow: 0 0 10px rgba(255, 51, 51, 0.5);
+  }
 }
 
 .history-content {
   @apply p-6;
+  position: relative;
+  z-index: 1;
 }
 
 .empty-state {
   @apply flex flex-col items-center justify-center py-16 text-center;
 
+  svg {
+    color: #333;
+    opacity: 0.5;
+  }
+
   .empty-title {
-    @apply text-xl font-semibold text-slate-300 mt-4;
+    @apply text-xl font-semibold font-mono mt-4;
+    color: #555;
   }
 
   .empty-text {
-    @apply text-sm text-slate-500 mt-2;
+    @apply text-sm font-mono mt-2;
+    color: #444;
   }
 
   .empty-action {
-    @apply mt-6 px-6 py-3 rounded-xl bg-primary text-white font-medium;
-    @apply hover:bg-primary-dark transition-colors;
+    @apply mt-6 px-6 py-3 rounded-lg font-mono font-medium transition-all duration-300;
+    background: linear-gradient(135deg, #00cc33 0%, #00ff41 50%, #00cc33 100%);
+    background-size: 200% 200%;
+    border: 1px solid #00ff41;
+    color: #000;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+
+    &:hover {
+      background-position: 100% 100%;
+      box-shadow: 0 0 30px rgba(0, 255, 65, 0.5);
+    }
   }
 }
 
@@ -49,59 +136,142 @@
 }
 
 .history-card {
-  @apply bg-surface-light rounded-xl overflow-hidden;
-  @apply border border-slate-700/50 hover:border-slate-600 transition-colors;
+  @apply rounded-lg overflow-hidden;
+  background: rgba(0, 0, 0, 0.6);
+  border: 1px solid rgba(0, 255, 65, 0.15);
+  backdrop-filter: blur(5px);
+  transition: all 0.3s ease;
+
+  &:hover {
+    border-color: rgba(0, 255, 65, 0.4);
+    box-shadow: 0 0 30px rgba(0, 255, 65, 0.1);
+    transform: translateY(-2px);
+  }
 }
 
 .card-header {
-  @apply flex items-center justify-between px-4 py-2 bg-slate-700/50;
+  @apply flex items-center justify-between px-4 py-2;
+  background: rgba(0, 255, 65, 0.05);
+  border-bottom: 1px solid rgba(0, 255, 65, 0.1);
 
   .card-date {
-    @apply text-xs text-slate-400;
+    @apply text-xs font-mono;
+    color: #555;
   }
 
   .card-cost {
-    @apply text-xs font-medium text-success;
+    @apply text-xs font-mono font-medium;
+    color: #00ff41;
+    text-shadow: 0 0 5px rgba(0, 255, 65, 0.5);
   }
 }
 
 .card-video {
-  @apply bg-black aspect-video;
+  @apply aspect-video;
+  background: #000;
+  position: relative;
+
+  &::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border: 1px solid rgba(0, 255, 65, 0.1);
+    pointer-events: none;
+  }
 }
 
 .video-preview {
   @apply w-full h-full object-contain;
+  transition: transform 0.3s ease;
+
+  .history-card:hover & {
+    transform: scale(1.02);
+  }
 }
 
 .card-info {
   @apply p-4;
 
   .card-prompt {
-    @apply text-sm text-slate-300 line-clamp-2;
+    @apply text-sm font-mono line-clamp-2;
+    color: #888;
+    min-height: 2.5rem;
   }
 
   .card-meta {
-    @apply flex items-center gap-2 mt-2;
+    @apply flex flex-wrap items-center gap-2 mt-3;
   }
 
   .meta-item {
-    @apply text-xs px-2 py-0.5 rounded bg-slate-700/50 text-slate-400;
+    @apply text-xs font-mono px-2 py-1 rounded;
+    background: rgba(0, 255, 65, 0.05);
+    border: 1px solid rgba(0, 255, 65, 0.15);
+    color: #666;
+  }
+
+  .meta-model {
+    background: rgba(0, 212, 255, 0.05);
+    border-color: rgba(0, 212, 255, 0.2);
+    color: #00d4ff;
   }
 }
 
 .card-actions {
-  @apply flex items-center gap-2 px-4 py-3 border-t border-slate-700/50;
+  @apply flex items-center gap-2 px-4 py-3;
+  border-top: 1px solid rgba(0, 255, 65, 0.1);
+  background: rgba(0, 0, 0, 0.3);
 }
 
 .action-btn {
-  @apply p-2 rounded-lg text-slate-400 hover:text-slate-200;
-  @apply hover:bg-slate-700/50 transition-colors;
+  @apply p-2 rounded-lg transition-all duration-200;
+  color: #555;
+  border: 1px solid transparent;
+
+  &:hover {
+    color: #888;
+    background: rgba(255, 255, 255, 0.05);
+  }
 
   &.primary {
-    @apply text-primary hover:text-primary hover:bg-primary/10;
+    color: #00ff41;
+
+    &:hover {
+      background: rgba(0, 255, 65, 0.1);
+      border-color: rgba(0, 255, 65, 0.3);
+      box-shadow: 0 0 15px rgba(0, 255, 65, 0.2);
+    }
   }
 
   &.danger {
-    @apply hover:text-error hover:bg-error/10;
+    &:hover {
+      color: #ff3333;
+      background: rgba(255, 51, 51, 0.1);
+      border-color: rgba(255, 51, 51, 0.3);
+    }
   }
+}
+
+// Hover effect on video
+.history-card .card-video {
+  position: relative;
+  overflow: hidden;
+
+  &::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      135deg,
+      transparent 0%,
+      rgba(0, 255, 65, 0.03) 50%,
+      transparent 100%
+    );
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    z-index: 1;
+  }
+}
+
+.history-card:hover .card-video::before {
+  opacity: 1;
 }
