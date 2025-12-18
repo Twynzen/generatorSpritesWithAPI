@@ -1,4 +1,4 @@
-import { Component, output, signal, inject } from '@angular/core';
+import { Component, output, signal, inject, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ImageService } from '../../../core/services/image.service';
 import { ImageMetadata } from '../../../core/models/image-metadata.model';
@@ -20,6 +20,38 @@ export class DropZoneComponent {
   // State
   isDragOver = signal(false);
   isLoading = signal(false);
+
+  /**
+   * Listen for Ctrl+V paste events globally
+   */
+  @HostListener('window:paste', ['$event'])
+  onPaste(event: ClipboardEvent): void {
+    // Don't process if already loading
+    if (this.isLoading()) return;
+
+    // Don't intercept if user is typing in an input/textarea
+    const activeElement = document.activeElement;
+    if (activeElement instanceof HTMLInputElement ||
+        activeElement instanceof HTMLTextAreaElement) {
+      return;
+    }
+
+    const items = event.clipboardData?.items;
+    if (!items) return;
+
+    // Find image in clipboard
+    for (let i = 0; i < items.length; i++) {
+      const item = items[i];
+      if (item.type.startsWith('image/')) {
+        event.preventDefault();
+        const file = item.getAsFile();
+        if (file) {
+          this.processFile(file);
+        }
+        return;
+      }
+    }
+  }
 
   onDragOver(event: DragEvent): void {
     event.preventDefault();

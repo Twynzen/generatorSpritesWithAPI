@@ -75,6 +75,15 @@
   }
 }
 
+// Keyboard key style
+.kbd {
+  @apply px-1.5 py-0.5 rounded text-xs font-mono;
+  background: rgba(0, 255, 65, 0.1);
+  border: 1px solid rgba(0, 255, 65, 0.3);
+  color: #00ff41;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+
 // Text styles in drop zone
 :host ::ng-deep {
   .drop-zone-content {
