@@ -9,7 +9,7 @@ export const API_CONFIG = {
   LIMITS: {
     MAX_IMAGE_SIZE: 10 * 1024 * 1024, // 10MB
     SUPPORTED_FORMATS: ['image/jpeg', 'image/png', 'image/webp', 'image/gif'],
-    MAX_PROMPT_LENGTH: 500
+    MAX_PROMPT_LENGTH: 2000
   }
 } as const;
 

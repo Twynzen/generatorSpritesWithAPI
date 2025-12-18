@@ -1,8 +1,8 @@
 <div class="prompt-editor">
   <div class="prompt-header">
     <label class="prompt-label">Animation Prompt</label>
-    <span class="char-count" [class.warning]="prompt().length > 450">
-      {{ prompt().length }} / 500
+    <span class="char-count" [class.warning]="prompt().length > 1800">
+      {{ prompt().length }} / 2000
     </span>
   </div>
 
@@ -30,7 +30,7 @@
     <textarea
       [(ngModel)]="prompt"
       placeholder="Describe the animation you want to generate. E.g: 'Character performs walk cycle, legs stepping forward and back alternately...'"
-      maxlength="500"
+      maxlength="2000"
       rows="4"
       class="prompt-textarea"
     ></textarea>
