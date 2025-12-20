@@ -1,0 +1,66 @@
+<div class="motion-reference">
+  <div class="section-header">
+    <span class="section-title">Motion Reference (Optional)</span>
+    <span class="section-hint">Upload a video to copy movements, gestures, or lip-sync</span>
+  </div>
+
+  @if (motionRef(); as ref) {
+    <!-- Preview mode -->
+    <div class="video-preview">
+      <video
+        [src]="ref.url"
+        controls
+        class="preview-video"
+        playsinline
+      ></video>
+      <button
+        type="button"
+        class="remove-btn"
+        (click)="onRemove()"
+        title="Remove reference video"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+          <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" />
+        </svg>
+      </button>
+    </div>
+  } @else {
+    <!-- Upload mode -->
+    <div
+      class="drop-zone"
+      [class.drag-over]="isDragOver()"
+      [class.loading]="isLoading()"
+      (dragover)="onDragOver($event)"
+      (dragleave)="onDragLeave($event)"
+      (drop)="onDrop($event)"
+    >
+      <input
+        type="file"
+        accept="video/mp4,video/webm,video/quicktime"
+        (change)="onFileInputChange($event)"
+        class="file-input"
+        #fileInput
+      />
+
+      @if (isLoading()) {
+        <div class="loading-spinner"></div>
+        <span class="drop-text">Processing...</span>
+      } @else {
+        <div class="upload-icon">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+          </svg>
+        </div>
+        <span class="drop-text">Drop reference video here</span>
+        <span class="drop-hint">or click to browse (MP4, WebM, MOV - Max 50MB)</span>
+      }
+    </div>
+  }
+
+  <div class="motion-tips">
+    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+      <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd" />
+    </svg>
+    <span>The AI will copy movements, facial expressions, and gestures from the reference video</span>
+  </div>
+</div>

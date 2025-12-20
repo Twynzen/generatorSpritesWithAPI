@@ -1,0 +1,76 @@
+.motion-reference {
+  @apply bg-surface-light rounded-xl p-4 space-y-3;
+}
+
+.section-header {
+  @apply space-y-1;
+
+  .section-title {
+    @apply block text-sm font-medium text-slate-300;
+  }
+
+  .section-hint {
+    @apply block text-xs text-slate-500;
+  }
+}
+
+.video-preview {
+  @apply relative rounded-lg overflow-hidden bg-slate-800;
+
+  .preview-video {
+    @apply w-full max-h-48 object-contain;
+  }
+
+  .remove-btn {
+    @apply absolute top-2 right-2 p-1.5 rounded-full;
+    @apply bg-red-500/80 hover:bg-red-500 text-white;
+    @apply transition-colors;
+  }
+}
+
+.drop-zone {
+  @apply relative flex flex-col items-center justify-center;
+  @apply p-6 rounded-lg cursor-pointer;
+  @apply border-2 border-dashed border-slate-600;
+  @apply bg-slate-800/50 hover:bg-slate-800;
+  @apply transition-all;
+
+  &.drag-over {
+    @apply border-primary bg-primary/10;
+  }
+
+  &.loading {
+    @apply pointer-events-none opacity-75;
+  }
+}
+
+.file-input {
+  @apply absolute inset-0 w-full h-full opacity-0 cursor-pointer;
+}
+
+.upload-icon {
+  @apply mb-2 text-slate-500;
+}
+
+.drop-text {
+  @apply text-sm text-slate-300;
+}
+
+.drop-hint {
+  @apply text-xs text-slate-500 mt-1;
+}
+
+.loading-spinner {
+  @apply w-8 h-8 mb-2 rounded-full;
+  @apply border-2 border-slate-600 border-t-primary;
+  @apply animate-spin;
+}
+
+.motion-tips {
+  @apply flex items-start gap-2 p-3 rounded-lg bg-slate-800/50;
+  @apply text-xs text-slate-400;
+
+  svg {
+    @apply flex-shrink-0 mt-0.5 text-amber-500/70;
+  }
+}

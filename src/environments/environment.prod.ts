@@ -6,7 +6,15 @@ export const environment = {
     apiKey: '' // Not used, backend handles authentication
   },
   pricing: {
-    '480p': 0.20,
-    '720p': 0.40
+    'luma-dream-machine': {
+      pricePerVideo: 0.50,
+      model: 'Luma Dream Machine',
+      provider: 'fal.ai'
+    },
+    'kling-v2.6': {
+      pricePerSecond: 0.032,
+      model: 'Kling VIDEO 2.6',
+      provider: 'fal.ai'
+    }
   } as const
 };

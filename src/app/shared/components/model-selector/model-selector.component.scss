@@ -1,0 +1,76 @@
+.model-selector {
+  @apply bg-surface-light rounded-xl p-4 space-y-4;
+}
+
+.selector-header {
+  @apply flex items-center justify-between;
+
+  .selector-label {
+    @apply text-sm font-medium text-slate-300;
+  }
+}
+
+.model-options {
+  @apply grid grid-cols-1 gap-3;
+}
+
+.model-card {
+  @apply w-full text-left p-4 rounded-lg;
+  @apply bg-slate-700/50 border border-slate-600/50;
+  @apply hover:bg-slate-700 transition-all;
+
+  &.active {
+    @apply bg-primary/20 border-primary;
+  }
+}
+
+.model-header {
+  @apply flex items-center justify-between mb-2;
+
+  .model-name {
+    @apply font-semibold text-white;
+  }
+
+  .model-price {
+    @apply text-sm text-success font-medium;
+  }
+}
+
+.model-description {
+  @apply text-xs text-slate-400 mb-3;
+}
+
+.model-features {
+  @apply flex flex-wrap gap-1;
+}
+
+.feature-tag {
+  @apply text-xs px-2 py-0.5 rounded-full;
+  @apply bg-slate-600/50 text-slate-300;
+
+  .active & {
+    @apply bg-primary/30 text-primary;
+  }
+}
+
+.duration-selector {
+  @apply space-y-2 pt-3 border-t border-slate-700/50;
+
+  .selector-label {
+    @apply text-xs text-slate-500;
+  }
+}
+
+.duration-options {
+  @apply flex gap-2;
+}
+
+.duration-btn {
+  @apply flex-1 py-2 px-4 rounded-lg text-sm font-medium;
+  @apply bg-slate-700/50 border border-slate-600/50;
+  @apply hover:bg-slate-700 transition-all;
+
+  &.active {
+    @apply bg-primary/20 border-primary text-primary;
+  }
+}

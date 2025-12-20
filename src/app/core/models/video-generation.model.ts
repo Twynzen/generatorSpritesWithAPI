@@ -1,4 +1,5 @@
 import { AspectRatio } from './cost.model';
+import { VideoModelType } from './video-model.model';
 
 // Request for submit to FAL.ai Luma Dream Machine
 export interface FalSubmitRequest {
@@ -6,6 +7,15 @@ export interface FalSubmitRequest {
   prompt: string;
   aspectRatio: AspectRatio;
   loop: boolean;
+}
+
+// Request for submit to FAL.ai Kling VIDEO 2.6
+export interface KlingSubmitRequest {
+  imageUrl: string;
+  prompt: string;
+  aspectRatio: '16:9' | '9:16' | '1:1';
+  duration: number; // 5 or 10 seconds
+  motionReferenceUrl?: string; // Optional motion reference video
 }
 
 // Submit response
@@ -68,4 +78,6 @@ export interface GenerationHistoryItem {
   videoUrl: string;
   thumbnailUrl?: string;
   spriteImageUrl: string;
+  model?: VideoModelType; // Which model was used
+  duration?: number; // Duration in seconds (for Kling)
 }

@@ -1,0 +1,46 @@
+<div class="model-selector">
+  <div class="selector-header">
+    <span class="selector-label">AI Model</span>
+  </div>
+
+  <div class="model-options">
+    @for (model of models; track model.id) {
+      <button
+        type="button"
+        class="model-card"
+        [class.active]="selectedModel() === model.id"
+        (click)="onModelChange(model.id)"
+      >
+        <div class="model-header">
+          <span class="model-name">{{ model.name }}</span>
+          <span class="model-price">{{ getModelPrice(model) }}</span>
+        </div>
+        <p class="model-description">{{ model.description }}</p>
+        <div class="model-features">
+          @for (feature of model.features; track feature) {
+            <span class="feature-tag">{{ feature }}</span>
+          }
+        </div>
+      </button>
+    }
+  </div>
+
+  <!-- Duration selector for Kling -->
+  @if (selectedModel() === 'kling-v2.6') {
+    <div class="duration-selector">
+      <span class="selector-label">Video Duration</span>
+      <div class="duration-options">
+        @for (opt of durationOptions; track opt.value) {
+          <button
+            type="button"
+            class="duration-btn"
+            [class.active]="duration() === opt.value"
+            (click)="onDurationChange(opt.value)"
+          >
+            {{ opt.label }}
+          </button>
+        }
+      </div>
+    </div>
+  }
+</div>

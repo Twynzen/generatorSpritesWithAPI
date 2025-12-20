@@ -26,9 +26,20 @@
   <main class="generator-content">
     <!-- Left Column: Inputs -->
     <section class="input-section">
+      <!-- Model Selector -->
+      <div class="input-group">
+        <h2 class="section-title">1. Choose AI Model</h2>
+        <app-model-selector
+          [selectedModel]="state.selectedModel()"
+          [duration]="state.duration()"
+          (modelChange)="onModelChange($event)"
+          (durationChange)="onDurationChange($event)"
+        />
+      </div>
+
       <!-- Sprite Image -->
       <div class="input-group">
-        <h2 class="section-title">1. Upload Your Sprite</h2>
+        <h2 class="section-title">2. Upload Your Sprite</h2>
 
         @if (state.spriteImage(); as spriteImage) {
           <app-image-preview
@@ -44,16 +55,35 @@
         }
       </div>
 
+      <!-- Motion Reference (Only for Kling) -->
+      @if (state.selectedModel() === 'kling-v2.6' && state.spriteImage()) {
+        <div class="input-group">
+          <h2 class="section-title">3. Motion Reference</h2>
+          <app-motion-reference
+            [motionRef]="state.motionReference()"
+            (fileSelected)="onMotionReferenceSelected($event)"
+            (remove)="removeMotionReference()"
+            (error)="onError($event)"
+          />
+        </div>
+      }
+
       <!-- Prompt -->
       @if (state.spriteImage()) {
         <div class="input-group">
-          <h2 class="section-title">2. Describe the Animation</h2>
+          <h2 class="section-title">
+            {{ state.selectedModel() === 'kling-v2.6' ? '4' : '3' }}. Describe the Animation
+          </h2>
           <app-prompt-editor
             [prompt]="state.prompt()"
             (promptChange)="onPromptChange($event)"
           />
           <p class="input-hint">
-            Tip: Describe the movement you want, e.g., "Character walking cycle, smooth loop animation, side view"
+            @if (state.selectedModel() === 'kling-v2.6') {
+              Tip: Describe the scene and motion, e.g., "Person talking and gesturing with hands, natural movements"
+            } @else {
+              Tip: Describe the movement you want, e.g., "Character walking cycle, smooth loop animation, side view"
+            }
           </p>
         </div>
       }
@@ -119,8 +149,12 @@
   <footer class="page-footer">
     <p>
       Powered by <a href="https://fal.ai" target="_blank">FAL.ai</a> -
-      Model: Luma Dream Machine -
-      <a href="https://fal.ai/models/fal-ai/luma-dream-machine" target="_blank">Documentation</a>
+      Model: {{ VIDEO_MODELS[state.selectedModel()].name }} -
+      @if (state.selectedModel() === 'luma-dream-machine') {
+        <a href="https://fal.ai/models/fal-ai/luma-dream-machine" target="_blank">Documentation</a>
+      } @else {
+        <a href="https://fal.ai/models/fal-ai/kling-video" target="_blank">Documentation</a>
+      }
     </p>
   </footer>
 </div>

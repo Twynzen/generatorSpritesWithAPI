@@ -8,9 +8,15 @@ export const environment = {
     apiKey: 'YOUR_FAL_API_KEY' // Get your key from https://fal.ai
   },
   pricing: {
-    // Luma Dream Machine has fixed price per video
-    pricePerVideo: 0.50,
-    model: 'Luma Dream Machine',
-    provider: 'fal.ai'
+    'luma-dream-machine': {
+      pricePerVideo: 0.50,
+      model: 'Luma Dream Machine',
+      provider: 'fal.ai'
+    },
+    'kling-v2.6': {
+      pricePerSecond: 0.032,
+      model: 'Kling VIDEO 2.6',
+      provider: 'fal.ai'
+    }
   } as const
 };
